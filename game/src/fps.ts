@@ -17,12 +17,7 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x88ccee);
 scene.fog = new THREE.Fog(0x88ccee, 0, 50);
 
-const camera = new THREE.PerspectiveCamera(
-  70,
-  window.innerWidth / window.innerHeight,
-  0.1,
-  1000
-);
+const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.rotation.order = "YXZ";
 
 const fillLight1 = new THREE.HemisphereLight(0x4488bb, 0x002244, 0.5);
@@ -95,11 +90,7 @@ for (let i = 0; i < NUM_SPHERES; i++) {
 
 const worldOctree = new Octree();
 
-const playerCollider = new Capsule(
-  new THREE.Vector3(0, 0.35, 0),
-  new THREE.Vector3(0, 1, 0),
-  0.35
-);
+const playerCollider = new Capsule(new THREE.Vector3(0, 0.35, 0), new THREE.Vector3(0, 1, 0), 0.35);
 
 const playerVelocity = new THREE.Vector3();
 const playerDirection = new THREE.Vector3();
@@ -142,14 +133,11 @@ function throwBall() {
 
   camera.getWorldDirection(playerDirection);
 
-  sphere.collider.center
-    .copy(playerCollider.end)
-    .addScaledVector(playerDirection, playerCollider.radius * 2);
+  sphere.collider.center.copy(playerCollider.end).addScaledVector(playerDirection, playerCollider.radius * 2);
 
   // throw the ball with more force if we hold the button longer, and if we move forward
 
-  const impulse =
-    15 + 30 * (1 - Math.exp((mouseTime - performance.now()) * 0.001));
+  const impulse = 15 + 30 * (1 - Math.exp((mouseTime - performance.now()) * 0.001));
 
   sphere.velocity.copy(playerDirection).multiplyScalar(impulse);
   sphere.velocity.addScaledVector(playerVelocity, 2);
@@ -166,10 +154,7 @@ function playerCollisions() {
     playerOnFloor = result.normal.y > 0;
 
     if (!playerOnFloor) {
-      playerVelocity.addScaledVector(
-        result.normal,
-        -result.normal.dot(playerVelocity)
-      );
+      playerVelocity.addScaledVector(result.normal, -result.normal.dot(playerVelocity));
     }
 
     playerCollider.translate(result.normal.multiplyScalar(result.depth));
@@ -197,9 +182,7 @@ function updatePlayer(deltaTime: number) {
 }
 
 function playerSphereCollision(sphere: Sphere) {
-  const center = vector1
-    .addVectors(playerCollider.start, playerCollider.end)
-    .multiplyScalar(0.5);
+  const center = vector1.addVectors(playerCollider.start, playerCollider.end).multiplyScalar(0.5);
 
   const sphere_center = sphere.collider.center;
 
@@ -213,12 +196,8 @@ function playerSphereCollision(sphere: Sphere) {
 
     if (d2 < r2) {
       const normal = vector1.subVectors(point, sphere_center).normalize();
-      const v1 = vector2
-        .copy(normal)
-        .multiplyScalar(normal.dot(playerVelocity));
-      const v2 = vector3
-        .copy(normal)
-        .multiplyScalar(normal.dot(sphere.velocity));
+      const v1 = vector2.copy(normal).multiplyScalar(normal.dot(playerVelocity));
+      const v2 = vector3.copy(normal).multiplyScalar(normal.dot(sphere.velocity));
 
       playerVelocity.add(v2).sub(v1);
       sphere.velocity.add(v1).sub(v2);
@@ -241,9 +220,7 @@ function spheresCollisions() {
       const r2 = r * r;
 
       if (d2 < r2) {
-        const normal = vector1
-          .subVectors(s1.collider.center, s2.collider.center)
-          .normalize();
+        const normal = vector1.subVectors(s1.collider.center, s2.collider.center).normalize();
         const v1 = vector2.copy(normal).multiplyScalar(normal.dot(s1.velocity));
         const v2 = vector3.copy(normal).multiplyScalar(normal.dot(s2.velocity));
 
@@ -266,10 +243,7 @@ function updateSpheres(deltaTime: number) {
     const result = worldOctree.sphereIntersect(sphere.collider);
 
     if (result) {
-      sphere.velocity.addScaledVector(
-        result.normal,
-        -result.normal.dot(sphere.velocity) * 1.5
-      );
+      sphere.velocity.addScaledVector(result.normal, -result.normal.dot(sphere.velocity) * 1.5);
       sphere.collider.center.add(result.normal.multiplyScalar(result.depth));
     } else {
       sphere.velocity.y -= GRAVITY * deltaTime;

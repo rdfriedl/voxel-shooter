@@ -4,21 +4,13 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { VOXLoader, VOXMesh } from "three/examples/jsm/loaders/VOXLoader.js";
 
-let camera: THREE.PerspectiveCamera,
-  controls: OrbitControls,
-  scene: THREE.Scene,
-  renderer: THREE.WebGLRenderer;
+let camera: THREE.PerspectiveCamera, controls: OrbitControls, scene: THREE.Scene, renderer: THREE.WebGLRenderer;
 
 init();
 animate();
 
 function init() {
-  camera = new THREE.PerspectiveCamera(
-    50,
-    window.innerWidth / window.innerHeight,
-    0.01,
-    10
-  );
+  camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.01, 10);
   camera.position.set(0.175, 0.075, 0.175);
 
   scene = new THREE.Scene();

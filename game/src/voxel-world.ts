@@ -3,18 +3,9 @@ import { Address, Octree } from "./octree";
 
 function sumColors(colors: number[]) {
   const filteredColors = colors.filter((c) => c !== 0);
-  const r =
-    0xff &
-    (filteredColors.reduce((v, color) => v + (0xff & color), 0) /
-      filteredColors.length);
-  const g =
-    0xff &
-    (filteredColors.reduce((v, color) => v + (0xff & (color >> 8)), 0) /
-      filteredColors.length);
-  const b =
-    0xff &
-    (filteredColors.reduce((v, color) => v + (0xff & (color >> 16)), 0) /
-      filteredColors.length);
+  const r = 0xff & (filteredColors.reduce((v, color) => v + (0xff & color), 0) / filteredColors.length);
+  const g = 0xff & (filteredColors.reduce((v, color) => v + (0xff & (color >> 8)), 0) / filteredColors.length);
+  const b = 0xff & (filteredColors.reduce((v, color) => v + (0xff & (color >> 16)), 0) / filteredColors.length);
   return r | (g << 8) | (b << 16);
 }
 
@@ -65,14 +56,7 @@ export class VoxelWorld {
     return address;
   }
   vec3OutOfBounds(vec: Vector3) {
-    return (
-      vec.x < 0 ||
-      vec.y < 0 ||
-      vec.z < 0 ||
-      vec.x >= this.size ||
-      vec.y >= this.size ||
-      vec.z >= this.size
-    );
+    return vec.x < 0 || vec.y < 0 || vec.z < 0 || vec.x >= this.size || vec.y >= this.size || vec.z >= this.size;
   }
 
   getVoxel(vec: Vector3) {

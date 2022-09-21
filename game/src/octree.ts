@@ -1,26 +1,17 @@
-// import md5 from "md5";
-
 type LodMethod = (values: number[]) => number;
 
-const defaultLod: LodMethod = (v) =>
-  (v[0] + v[1] + v[2] + v[3] + v[4] + v[5] + v[6] + v[7]) / 8;
+const defaultLod: LodMethod = (v) => (v[0] + v[1] + v[2] + v[3] + v[4] + v[5] + v[6] + v[7]) / 8;
 
 export class Octree {
   bitLength = 0;
   branches: (Octree | number)[] = [];
   parent?: Octree;
-  // hash: string = "";
   lodMethod: LodMethod;
   lodValue: number;
   dirty = true;
   isTree = true;
 
-  constructor(
-    bitLength: number,
-    lod: LodMethod = defaultLod,
-    fill: number = 0,
-    parent?: Octree
-  ) {
+  constructor(bitLength: number, lod: LodMethod = defaultLod, fill: number = 0, parent?: Octree) {
     this.bitLength = bitLength;
     this.parent = parent;
     this.lodMethod = lod;
@@ -39,12 +30,7 @@ export class Octree {
   splitBranch(index: number, makeDirty = true) {
     let value = this.branches[index];
     if (typeof value === "number") {
-      value = this.branches[index] = new Octree(
-        this.bitLength,
-        this.lodMethod,
-        value,
-        this
-      );
+      value = this.branches[index] = new Octree(this.bitLength, this.lodMethod, value, this);
     }
 
     if (makeDirty) this.setDirty();
@@ -63,17 +49,11 @@ export class Octree {
       else return cell.update(force);
     });
     this.lodValue = this.lodMethod(values);
-    // this.hash = md5(values);
     this.dirty = false;
     return this.lodValue;
   }
 
-  recursiveSetValue(
-    address: Address,
-    value: number,
-    makeDirty = false,
-    addrIndex = 0
-  ) {
+  recursiveSetValue(address: Address, value: number, makeDirty = false, addrIndex = 0) {
     const index = address.get(addrIndex);
     if (addrIndex === address.length - 1) {
       this.setBranch(index, value, makeDirty);
@@ -145,9 +125,7 @@ export function encodeOctree(tree: Octree): ArrayBuffer {
 
   recurse(tree);
 
-  const buffer = new ArrayBuffer(
-    Math.ceil((commands.length + data.length * tree.bitLength) / 8)
-  );
+  const buffer = new ArrayBuffer(Math.ceil((commands.length + data.length * tree.bitLength) / 8));
   const view = new DataView(buffer);
 
   let offset = 0;
