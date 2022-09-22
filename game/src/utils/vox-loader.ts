@@ -1,6 +1,6 @@
 import { Vector3 } from "three";
-import { DEFAULT_PALETTE } from "./color";
-import { VoxelWorld } from "./voxel-world";
+import { DEFAULT_PALETTE } from "../color";
+import { VoxelWorld } from "../voxel-world";
 
 export type VoxChunk = {
   palette: number[];
@@ -80,14 +80,16 @@ export function readVoxChunksIntoWorld(chunks: VoxChunk[], world: VoxelWorld) {
   const v = new Vector3();
   for (const chunk of chunks) {
     for (let i = 0; i < chunk.data.length; i += 4) {
-      v.x = chunk.data[i + 0];
-      v.y = chunk.data[i + 1];
-      v.z = chunk.data[i + 2];
+      const x = chunk.data[i + 0];
+      const y = chunk.data[i + 1];
+      const z = chunk.data[i + 2];
       const c = chunk.data[i + 3];
+
+      v.set(y, z, x);
 
       world.setVoxel(v, c);
     }
 
-    world.colorPalette = chunk.palette;
+    world.palette = chunk.palette;
   }
 }

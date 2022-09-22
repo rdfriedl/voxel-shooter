@@ -1,17 +1,5 @@
-import { BufferGeometry, Float32BufferAttribute, Group, Mesh, MeshStandardMaterial, Vector3 } from "three";
-import { VOXMesh } from "three/examples/jsm/loaders/VOXLoader";
-import { cachedPow2 } from "./math";
-import { VoxChunk } from "./vox-loader";
-import { getOctreeAddress, VoxelChunk, VoxelWorld } from "./voxel-world";
-
-// export class VoxelWorldChunk extends Group {
-//   chunk: VoxelWorld;
-//   constructor(chunk: VoxelWorld) {
-//     super();
-
-//     this.chunk = chunk;
-//   }
-// }
+import { Box3, Box3Helper, BufferGeometry, Float32BufferAttribute, Group, Mesh, MeshStandardMaterial, Vector3 } from "three";
+import { VoxelChunk, VoxelWorld } from "./voxel-world";
 
 export class VoxelWorldMesh extends Group {
   world: VoxelWorld;
@@ -20,141 +8,82 @@ export class VoxelWorldMesh extends Group {
 
     this.world = world;
 
-    const v = new Vector3();
-    for (let z = 0; z < world.size.z; z++) {
-      for (let y = 0; y < world.size.y; y++) {
-        for (let x = 0; x < world.size.x; x++) {
-          v.set(x, y, z);
-          const chunk = world.getChunk(v);
-          const data = this.getLodVoxChunk(chunk, 4);
+    // const box = new Box3();
+    // box.min.set(0, 0, 0);
+    // box.max.copy(world.size).multiplyScalar(world.chunkSize);
+    // this.add(new Box3Helper(box));
 
-          const mesh = new VOXMesh(data);
-          mesh.position.set(x * chunk.size, y * chunk.size, z * chunk.size);
-          mesh.rotateOnAxis(new Vector3(1, 0, 0), Math.PI / 2);
-          this.add(mesh);
-        }
-      }
+    for (const [v, chunk] of world) {
+      // const box = new Box3();
+      // box.min.copy(v).multiply(chunk.size);
+      // box.max.copy(box.min).add(chunk.size);
+      // this.add(new Box3Helper(box));
+
+      const mesh = new VOXMesh(chunk);
+      mesh.position.copy(v).multiply(chunk.size);
+      this.add(mesh);
     }
   }
-
-  getLodVoxChunk(chunk: VoxelChunk, lod: number = 0): VoxChunk {
-    const size = cachedPow2(lod);
-    if (size === 0) throw new Error("level must be greater than 0");
-    const array = [];
-    const v = new Vector3();
-    for (let z = 0; z < size; z++) {
-      for (let y = 0; y < size; y++) {
-        for (let x = 0; x < size; x++) {
-          v.set(x, y, z);
-          const value = chunk.getVoxel(v, lod);
-          if (value !== 0) {
-            array.push(x);
-            array.push(y);
-            array.push(z);
-            array.push(value);
-          }
-        }
-      }
-    }
-
-    return {
-      size: new Vector3(size, size, size),
-      palette: this.world.colorPalette,
-      data: Uint8Array.from(array),
-    };
-  }
-
-  // updateLods() {
-  //   this.lods = [];
-  //   for (let i = 0; i < this.levels; i++) {
-  //     const voxChunk = this.getLodVoxChunk(i);
-  //     this.lods.push(new VOXMesh(voxChunk));
-  //   }
-  // }
 }
 
-// type ChunkLodData = {
-// 	size: Vector3,
-// 	palette: number[],
-// 	data: Uint8Array,
-// }
+class VOXMesh extends Mesh {
+  constructor(chunk: VoxelChunk) {
+    const size = chunk.size;
+    const palette = chunk.world.palette;
 
-// class VOXMesh extends Mesh {
-//   constructor(chunk: ChunkLodData) {
-//     const data = chunk.data;
-//     const size = chunk.size;
-//     const palette = chunk.palette;
+    const vertices: number[] = [];
+    const colors: number[] = [];
 
-//     const vertices: number[] = [];
-//     const colors: number[] = [];
+    const nx = [0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 1, 0, 0, 0, 1];
+    const px = [1, 0, 0, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0];
+    const py = [0, 1, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 1, 1];
+    const ny = [0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0];
+    const pz = [0, 0, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1];
+    const nz = [0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 1, 0, 0, 0, 1, 0];
 
-//     const nx = [0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 1, 0, 0, 0, 1];
-//     const px = [1, 0, 0, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0];
-//     const py = [0, 0, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1];
-//     const ny = [0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 1, 0, 0, 0, 1, 0];
-//     const nz = [0, 0, 1, 0, 0, 0, 1, 0, 1, 1, 0, 0, 1, 0, 1, 0, 0, 0];
-//     const pz = [0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 0, 1, 0, 1, 1, 1];
+    function add(tile: number[], x: number, y: number, z: number, r: number, g: number, b: number) {
+      for (let i = 0; i < 18; i += 3) {
+        vertices.push(tile[i + 0] + x, tile[i + 1] + y, tile[i + 2] + z);
+        colors.push(r, g, b);
+      }
+    }
 
-//     function add(tile: number[], x: number, y: number, z: number, r: number, g: number, b: number) {
-//       x -= size.x / 2;
-//       y -= size.z / 2;
-//       z += size.y / 2;
+    // Store data in a volume for sampling
+    const offsety = size.x;
+    const offsetz = size.x * size.y;
+    const array = chunk.data;
 
-//       for (let i = 0; i < 18; i += 3) {
-//         vertices.push(tile[i + 0] + x, tile[i + 1] + y, tile[i + 2] + z);
-//         colors.push(r, g, b);
-//       }
-//     }
+    // Construct geometry
+    let hasColors = false;
+    for (const [v, c] of chunk) {
+      const { x, y, z } = v;
+      if (c === 0) continue;
+      const hex = palette[c];
+      const r = ((hex >> 0) & 0xff) / 0xff;
+      const g = ((hex >> 8) & 0xff) / 0xff;
+      const b = ((hex >> 16) & 0xff) / 0xff;
 
-//     // Store data in a volume for sampling
-//     const offsety = size.x;
-//     const offsetz = size.x * size.y;
-//     const array = new Uint8Array(size.x * size.y * size.z);
-//     for (let j = 0; j < data.length; j += 4) {
-//       const x = data[j + 0];
-//       const y = data[j + 1];
-//       const z = data[j + 2];
+      if (r > 0 || g > 0 || b > 0) hasColors = true;
 
-//       const index = x + y * offsety + z * offsetz;
+      const index = x + y * offsety + z * offsetz;
+      if (array[index + 1] === 0 || x === size.x - 1) add(px, x, y, z, r, g, b);
+      if (array[index - 1] === 0 || x === 0) add(nx, x, y, z, r, g, b);
+      if (array[index + offsety] === 0 || y === size.y - 1) add(py, x, y, z, r, g, b);
+      if (array[index - offsety] === 0 || y === 0) add(ny, x, y, z, r, g, b);
+      if (array[index + offsetz] === 0 || z === size.z - 1) add(pz, x, y, z, r, g, b);
+      if (array[index - offsetz] === 0 || z === 0) add(nz, x, y, z, r, g, b);
+    }
 
-//       array[index] = 255;
-//     }
+    const geometry = new BufferGeometry();
+    geometry.setAttribute("position", new Float32BufferAttribute(vertices, 3));
+    geometry.computeVertexNormals();
 
-//     // Construct geometry
-//     let hasColors = false;
-//     for (let j = 0; j < data.length; j += 4) {
-//       const x = data[j + 0];
-//       const y = data[j + 1];
-//       const z = data[j + 2];
-//       const c = data[j + 3];
+    const material = new MeshStandardMaterial();
+    if (hasColors) {
+      geometry.setAttribute("color", new Float32BufferAttribute(colors, 3));
+      material.vertexColors = true;
+    }
 
-//       const hex = palette[c];
-//       const r = ((hex >> 0) & 0xff) / 0xff;
-//       const g = ((hex >> 8) & 0xff) / 0xff;
-//       const b = ((hex >> 16) & 0xff) / 0xff;
-
-//       if (r > 0 || g > 0 || b > 0) hasColors = true;
-
-//       const index = x + y * offsety + z * offsetz;
-
-//       if (array[index + 1] === 0 || x === size.x - 1) add(px, x, z, -y, r, g, b);
-//       if (array[index - 1] === 0 || x === 0) add(nx, x, z, -y, r, g, b);
-//       if (array[index + offsety] === 0 || y === size.y - 1) add(ny, x, z, -y, r, g, b);
-//       if (array[index - offsety] === 0 || y === 0) add(py, x, z, -y, r, g, b);
-//       if (array[index + offsetz] === 0 || z === size.z - 1) add(pz, x, z, -y, r, g, b);
-//       if (array[index - offsetz] === 0 || z === 0) add(nz, x, z, -y, r, g, b);
-//     }
-
-//     const geometry = new BufferGeometry();
-//     geometry.setAttribute("position", new Float32BufferAttribute(vertices, 3));
-//     geometry.computeVertexNormals();
-
-//     const material = new MeshStandardMaterial();
-//     if (hasColors) {
-//       geometry.setAttribute("color", new Float32BufferAttribute(colors, 3));
-//       material.vertexColors = true;
-//     }
-
-//     super(geometry, material);
-//   }
-// }
+    super(geometry, material);
+  }
+}

@@ -1,102 +1,70 @@
 import { Vector3 } from "three";
-import { DEFAULT_PALETTE, maybeBlendColors } from "./color";
-import { FastOctree } from "./fast-octree";
-import { cachedPow2 } from "./math";
-import { Address } from "./octree";
-
-export function getOctreeAddress(vec: Vector3, levels: number) {
-  const address = new Address();
-  const v = vec.clone();
-  let size = cachedPow2(levels);
-
-  let level = levels;
-  while (level > 0) {
-    level--;
-    size /= 2;
-    let addr = 0;
-    if (v.x >= size) {
-      addr |= 1;
-      v.x -= size;
-    }
-    if (v.y >= size) {
-      addr |= 2;
-      v.y -= size;
-    }
-    if (v.z >= size) {
-      addr |= 4;
-      v.z -= size;
-    }
-    address.push(addr);
-  }
-
-  return address;
-}
+import { DEFAULT_PALETTE } from "./color";
+import { vecToIndex } from "./utils/3d-array";
 
 function tmpPickFirstColor(colors: number[]) {
   return colors.find((c) => c !== 0) || 0;
 }
 
 export class VoxelChunk {
-  size: number;
-  levels: number;
-  tree: FastOctree;
+  size: Vector3;
+  data: Uint8Array;
   world: VoxelWorld;
 
-  constructor(levels: number, world: VoxelWorld) {
-    const size = Math.pow(2, levels);
-    this.size = size;
-    this.levels = levels;
-    if (levels < 1) throw new Error("levels must be greater than 1");
+  constructor(size: number, world: VoxelWorld) {
+    this.size = new Vector3(size, size, size);
+    if (size < 1) throw new Error("size must be greater than 1");
 
     this.world = world;
-    this.tree = new FastOctree(tmpPickFirstColor);
+    this.data = new Uint8Array(size * size * size);
   }
 
-  isOutOfBounds(vec: Vector3, lod = this.levels) {
-    const size = cachedPow2(lod);
-    return vec.x < 0 || vec.y < 0 || vec.z < 0 || vec.x >= size || vec.y >= size || vec.z >= size;
+  isOutOfBounds(vec: Vector3) {
+    return vec.x < 0 || vec.y < 0 || vec.z < 0 || vec.x >= this.size.x || vec.y >= this.size.y || vec.z >= this.size.z;
   }
 
-  getVoxel(vec: Vector3, lod = this.levels) {
-    if (this.isOutOfBounds(vec, lod)) {
+  getVoxel(vec: Vector3) {
+    if (this.isOutOfBounds(vec)) {
       throw new Error("out of bounds");
     }
-    const address = getOctreeAddress(vec, lod);
-    const value = this.tree.get(address);
-    if (typeof value !== "number") {
-      throw new Error("failed to get voxel value");
-    }
-    return value;
+    return this.data[vecToIndex(vec, this.size)];
   }
-  setVoxel(vec: Vector3, value: number, lod = this.levels) {
-    if (this.isOutOfBounds(vec, lod)) {
+  setVoxel(vec: Vector3, value: number) {
+    if (this.isOutOfBounds(vec)) {
       throw new Error("out of bounds");
     }
-    const address = getOctreeAddress(vec, lod);
-    return this.tree.set(address, value);
+    this.data[vecToIndex(vec, this.size)] = value;
   }
 
-  update() {
-    this.tree.update();
+  get isEmpty() {
+    return this.data.some((v) => v !== 0);
+  }
+
+  *[Symbol.iterator]() {
+    const v = new Vector3();
+    let i = 0;
+    for (let z = 0; z < this.size.z; z++) {
+      for (let y = 0; y < this.size.y; y++) {
+        for (let x = 0; x < this.size.x; x++) {
+          v.set(x, y, z);
+          yield [v, this.data[i]] as const;
+          i++;
+        }
+      }
+    }
   }
 }
 
 export class VoxelWorld {
   size: Vector3;
   chunks: VoxelChunk[] = [];
-  chunkLevels: number;
   chunkSize: number;
-  colorPalette: number[];
+  palette: number[];
 
-  constructor(chunkLevels: number, size: Vector3, colorPalette = DEFAULT_PALETTE) {
+  constructor(chunkSize: number, size: Vector3, palette = DEFAULT_PALETTE) {
     this.size = size;
-    this.chunkLevels = chunkLevels;
-    this.chunkSize = Math.pow(2, chunkLevels);
-    this.colorPalette = colorPalette;
-  }
-
-  getChunkIndex(vec: Vector3) {
-    return vec.x + vec.y * this.size.x + vec.z * this.size.x * this.size.y;
+    this.chunkSize = chunkSize;
+    this.palette = palette;
   }
 
   isOutOfBounds(vec: Vector3) {
@@ -111,9 +79,9 @@ export class VoxelWorld {
   }
 
   getChunk(vec: Vector3) {
-    const index = this.getChunkIndex(vec);
+    const index = vecToIndex(vec, this.size);
     if (!this.chunks[index]) {
-      this.chunks[index] = new VoxelChunk(this.chunkLevels, this);
+      this.chunks[index] = new VoxelChunk(this.chunkSize, this);
     }
     return this.chunks[index];
   }
@@ -131,9 +99,19 @@ export class VoxelWorld {
     chunk.setVoxel(vec.clone().sub(chunkCords.multiplyScalar(this.chunkSize)), value);
   }
 
-  update() {
-    for (const chunk of this.chunks) {
-      if (chunk) chunk.update();
+  *[Symbol.iterator]() {
+    const v = new Vector3();
+    let i = 0;
+    for (let z = 0; z < this.size.z; z++) {
+      for (let y = 0; y < this.size.y; y++) {
+        for (let x = 0; x < this.size.x; x++) {
+          v.set(x, y, z);
+          if (this.chunks[i]) {
+            yield [v, this.chunks[i]] as const;
+          }
+          i++;
+        }
+      }
     }
   }
 }
