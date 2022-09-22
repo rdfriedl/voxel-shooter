@@ -1,15 +1,25 @@
 // import { connect } from "./connection";
 import * as THREE from "three";
+import { FileLoader, Vector3 } from "three";
 
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import { VOXLoader, VOXMesh } from "three/examples/jsm/loaders/VOXLoader.js";
+import { readVoxChunksIntoWorld, readVoxModelChunks } from "./vox-loader";
+import { VoxelWorld } from "./voxel-world";
+import { VoxelWorldMesh } from "./voxel-world-mesh";
+// import { VOXLoader, VOXMesh } from "three/examples/jsm/loaders/VOXLoader.js";
 
-let camera: THREE.PerspectiveCamera, controls: OrbitControls, scene: THREE.Scene, renderer: THREE.WebGLRenderer;
+let camera: THREE.PerspectiveCamera,
+  controls: OrbitControls,
+  scene: THREE.Scene,
+  renderer: THREE.WebGLRenderer,
+  world: VoxelWorld;
 
 init();
 animate();
 
 function init() {
+  world = new VoxelWorld(4, new Vector3(8, 8, 8));
+
   camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.01, 10);
   camera.position.set(0.175, 0.075, 0.175);
 
@@ -29,18 +39,39 @@ function init() {
   dirLight2.position.set(-1.5, -3, -2.5);
   scene.add(dirLight2);
 
-  const loader = new VOXLoader();
-  loader.load("/models/stress-test.vox", (chunks) => {
-    for (let i = 0; i < chunks.length; i++) {
-      const chunk = chunks[i];
+  const loader = new FileLoader();
+  loader.setResponseType("arraybuffer");
+  loader.load("/models/test-2.vox", (buffer) => {
+    if (buffer instanceof ArrayBuffer) {
+      const chunks = readVoxModelChunks(buffer);
+      readVoxChunksIntoWorld(chunks, world);
+      world.update();
 
-      displayPalette(chunk.palette);
+      console.log(world);
 
-      const mesh = new VOXMesh(chunk);
+      const mesh = new VoxelWorldMesh(world);
       mesh.scale.setScalar(0.0015);
       scene.add(mesh);
+
+      console.log(scene);
     }
   });
+
+  // const loader = new VOXLoader();
+  // loader.load("/models/stress-test.vox", (chunks) => {
+  //   console.time('load')
+  //   for (let i = 0; i < chunks.length; i++) {
+  //     const chunk = chunks[i];
+
+  //     // displayPalette(chunk.palette);
+
+  //     const mesh = new VOXMesh(chunk);
+  //     mesh.scale.setScalar(0.0015);
+  //     scene.add(mesh);
+  //   }
+
+  //   console.timeEnd('load')
+  // });
 
   // renderer
 
@@ -60,28 +91,28 @@ function init() {
   window.addEventListener("resize", onWindowResize);
 }
 
-function displayPalette(palette: number[]) {
-  const canvas = document.createElement("canvas");
-  canvas.width = 8;
-  canvas.height = 32;
-  canvas.style.position = "absolute";
-  canvas.style.top = "0";
-  canvas.style.width = "100px";
-  canvas.style.imageRendering = "pixelated";
-  document.body.appendChild(canvas);
-  const context = canvas.getContext("2d");
-  if (!context) return;
-  for (let c = 0; c < 256; c++) {
-    const x = c % 8;
-    const y = Math.floor(c / 8);
-    const hex = palette[c + 1];
-    const r = (hex >> 0) & 0xff;
-    const g = (hex >> 8) & 0xff;
-    const b = (hex >> 16) & 0xff;
-    context.fillStyle = `rgba(${r},${g},${b},1)`;
-    context.fillRect(x, 31 - y, 1, 1);
-  }
-}
+// function displayPalette(palette: number[]) {
+//   const canvas = document.createElement("canvas");
+//   canvas.width = 8;
+//   canvas.height = 32;
+//   canvas.style.position = "absolute";
+//   canvas.style.top = "0";
+//   canvas.style.width = "100px";
+//   canvas.style.imageRendering = "pixelated";
+//   document.body.appendChild(canvas);
+//   const context = canvas.getContext("2d");
+//   if (!context) return;
+//   for (let c = 0; c < 256; c++) {
+//     const x = c % 8;
+//     const y = Math.floor(c / 8);
+//     const hex = palette[c + 1];
+//     const r = (hex >> 0) & 0xff;
+//     const g = (hex >> 8) & 0xff;
+//     const b = (hex >> 16) & 0xff;
+//     context.fillStyle = `rgba(${r},${g},${b},1)`;
+//     context.fillRect(x, 31 - y, 1, 1);
+//   }
+// }
 
 function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
