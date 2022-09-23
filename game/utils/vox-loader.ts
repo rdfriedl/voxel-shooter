@@ -20,7 +20,7 @@ export function readVoxModelChunks(buffer: ArrayBuffer) {
   let i = 8;
 
   let chunk: VoxChunk;
-  const chunks = [];
+  const chunks: VoxChunk[] = [];
 
   while (i < data.byteLength) {
     let id = "";

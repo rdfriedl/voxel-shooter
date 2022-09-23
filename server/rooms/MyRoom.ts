@@ -1,7 +1,7 @@
 // rooms/MyRoom.ts (server-side, room file)
 import { Client, Room } from "colyseus";
 import { IncomingMessage } from "http";
-import { MyState } from "schema";
+import { MyState } from "../../common/schema";
 
 export class MyRoom extends Room<MyState> {
   // number of clients per room

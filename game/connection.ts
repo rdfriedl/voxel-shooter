@@ -1,5 +1,5 @@
 import { Client } from "colyseus.js";
-import { MyState } from "schema";
+import { MyState } from "../common/schema";
 const client = new Client("ws://localhost:5000");
 
 export async function connect() {

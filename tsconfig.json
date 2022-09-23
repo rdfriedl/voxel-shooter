@@ -10,7 +10,11 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "experimentalDecorators": true,
+    "noUnusedParameters": false,
+    "noUnusedLocals": false,
+    "noImplicitAny": false,
+    "noEmit": true,
     "outDir": "dist"
   },
-  "include": ["src"]
+  "include": ["game", "common", "server"]
 }

@@ -41,7 +41,7 @@ export class Octree {
   }
   update(force = false): number {
     if (!this.dirty && !force) return this.lodValue;
-    const values = [];
+    const values: number[] = [];
     for (let i = 0; i < 8; i++) {
       const data = this.data[i];
       values[i] = typeof data === "number" ? data : data.update(force);
