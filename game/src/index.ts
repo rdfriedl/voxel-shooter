@@ -1,7 +1,6 @@
 import * as THREE from "three";
 
-// import "./voxel-world-test";
-import "./vox-loader-test";
+import "./game";
 
 if (import.meta.env.DEV) {
   window.THREE = THREE;

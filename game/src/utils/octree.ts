@@ -1,5 +1,5 @@
 import { Vector3 } from "three";
-import { Address } from "../octree";
+import { Address } from "../old/octree";
 import { cachedPow2 } from "./math";
 
 export function getOctreeAddress(vec: Vector3, levels: number) {

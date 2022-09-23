@@ -1,8 +1,11 @@
 import { Box3, Box3Helper, BufferGeometry, Float32BufferAttribute, Group, Mesh, MeshStandardMaterial, Vector3 } from "three";
-import { VoxelChunk, VoxelWorld } from "./voxel-world";
+import { vecToIndex } from "../utils/3d-array";
+import { FACE, voxelFaceGenerator } from "../utils/voxel-chunk";
+import { VoxelChunk, VoxelWorld } from "../voxel-world";
 
-export class VoxelWorldMesh extends Group {
+export class VoxelWorldObject extends Group {
   world: VoxelWorld;
+  chunkObjects: VoxelChunkObject[] = [];
   constructor(world: VoxelWorld) {
     super();
 
@@ -19,56 +22,65 @@ export class VoxelWorldMesh extends Group {
       // box.max.copy(box.min).add(chunk.size);
       // this.add(new Box3Helper(box));
 
-      const mesh = new VOXMesh(chunk);
+      const mesh = new VoxelChunkMesh(chunk);
       mesh.position.copy(v).multiply(chunk.size);
       this.add(mesh);
     }
   }
-}
 
-const FACE = {
-  NX: 1 << 0,
-  PX: 1 << 1,
-  NY: 1 << 2,
-  PY: 1 << 3,
-  NZ: 1 << 4,
-  PZ: 1 << 5,
-};
-function* voxelFaceGenerator(chunk: VoxelChunk) {
-  const size = chunk.size;
-  const offsety = size.x;
-  const offsetz = size.x * size.y;
-  const data = chunk.data;
+  getChunkObject(v: Vector3) {
+    if (this.world.isOutOfBounds(v)) throw new Error("chunk out of bounds");
+    let chunkObject = this.chunkObjects[vecToIndex(v, this.world.size)];
 
-  for (const [v, color] of chunk) {
-    const { x, y, z } = v;
-    if (color === 0) continue;
+    if (!chunkObject) {
+      chunkObject = new VoxelChunkObject(this.world.getChunk(v));
+      this.add(chunkObject);
+    }
 
-    const index = x + y * offsety + z * offsetz;
-    let faces = 0;
-    if (data[index + 1] === 0 || x === size.x - 1) faces |= FACE.PX;
-    if (data[index - 1] === 0 || x === 0) faces |= FACE.NX;
-    if (data[index + offsety] === 0 || y === size.y - 1) faces |= FACE.PY;
-    if (data[index - offsety] === 0 || y === 0) faces |= FACE.NY;
-    if (data[index + offsetz] === 0 || z === size.z - 1) faces |= FACE.PZ;
-    if (data[index - offsetz] === 0 || z === 0) faces |= FACE.NZ;
-    if (faces !== 0) yield [v, color, faces] as const;
+    return chunkObject;
+  }
+
+  update() {
+    for (const [v, chunk] of this.world) {
+      let chunkObject = this.getChunkObject(v);
+
+      if (chunkObject.isDirty) {
+        chunkObject.update();
+      }
+    }
   }
 }
 
-class VOXMesh extends Mesh {
+export class VoxelChunkObject extends Group {
+  chunk: VoxelChunk;
+  isDirty = false;
+
+  constructor(chunk: VoxelChunk) {
+    super();
+    this.chunk = chunk;
+    this.update();
+  }
+
+  update() {
+    this.clear();
+    this.add(new VoxelChunkMesh(this.chunk));
+    this.isDirty = false;
+  }
+}
+
+const nx = [0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 1, 0, 0, 0, 1];
+const px = [1, 0, 0, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0];
+const py = [0, 1, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 1, 1];
+const ny = [0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0];
+const pz = [0, 0, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1];
+const nz = [0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 1, 0, 0, 0, 1, 0];
+
+export class VoxelChunkMesh extends Mesh {
   constructor(chunk: VoxelChunk) {
     const palette = chunk.world.palette;
 
     const vertices: number[] = [];
     const colors: number[] = [];
-
-    const nx = [0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 1, 0, 0, 0, 1];
-    const px = [1, 0, 0, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0];
-    const py = [0, 1, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 1, 1];
-    const ny = [0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0];
-    const pz = [0, 0, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1];
-    const nz = [0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 1, 0, 0, 0, 1, 0];
 
     function add(tile: number[], x: number, y: number, z: number, r: number, g: number, b: number) {
       for (let i = 0; i < 18; i += 3) {

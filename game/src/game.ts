@@ -2,9 +2,11 @@ import * as THREE from "three";
 import { Clock, FileLoader, Raycaster, Vector3 } from "three";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
 
+import CANNON from "cannon";
+
 import { readVoxChunksIntoWorld, readVoxModelChunks } from "./utils/vox-loader";
 import { VoxelWorld } from "./voxel-world";
-import { VoxelWorldMesh } from "./voxel-world-mesh";
+import { VoxelWorldObject } from "./objects/voxel-world-mesh";
 import { keyStates } from "./utils/key-states";
 
 let camera: THREE.PerspectiveCamera,
@@ -13,7 +15,7 @@ let camera: THREE.PerspectiveCamera,
   renderer: THREE.WebGLRenderer,
   world: VoxelWorld,
   raycaster: Raycaster,
-  voxelWorldMesh: VoxelWorldMesh,
+  voxelWorldMesh: VoxelWorldObject,
   clock: Clock;
 
 init();
@@ -50,7 +52,7 @@ function init() {
 
       console.log(world);
 
-      voxelWorldMesh = new VoxelWorldMesh(world);
+      voxelWorldMesh = new VoxelWorldObject(world);
       scene.add(voxelWorldMesh);
 
       console.log(scene);

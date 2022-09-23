@@ -2,10 +2,6 @@ import { Vector3 } from "three";
 import { DEFAULT_PALETTE } from "./color";
 import { vecToIndex } from "./utils/3d-array";
 
-function tmpPickFirstColor(colors: number[]) {
-  return colors.find((c) => c !== 0) || 0;
-}
-
 export class VoxelChunk {
   size: Vector3;
   data: Uint8Array;
