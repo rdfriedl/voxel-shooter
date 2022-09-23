@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { AxesHelper, Clock, FileLoader, Raycaster, Vector3 } from "three";
+import { Clock, FileLoader, Raycaster, Vector3 } from "three";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
 
 import { readVoxChunksIntoWorld, readVoxModelChunks } from "./utils/vox-loader";
@@ -40,14 +40,10 @@ function init() {
   dirLight2.position.set(-1.5, -3, -2.5);
   scene.add(dirLight2);
 
-  // helpers
-  const helper = new AxesHelper();
-  scene.add(helper);
-
   // loader
   const loader = new FileLoader();
   loader.setResponseType("arraybuffer");
-  loader.load("/models/stress-test.vox", (buffer) => {
+  loader.load("/models/level.vox", (buffer) => {
     if (buffer instanceof ArrayBuffer) {
       const chunks = readVoxModelChunks(buffer);
       readVoxChunksIntoWorld(chunks, world);
@@ -103,7 +99,7 @@ function animate() {
     velocity.x -= velocity.x * 10 * delta;
     velocity.z -= velocity.z * 10 * delta;
 
-    velocity.y -= 9.8 * 10 * delta;
+    velocity.y -= 9.8 * 20 * delta;
 
     const moveForward = keyStates["KeyW"] ?? false;
     const moveBackward = keyStates["KeyS"] ?? false;

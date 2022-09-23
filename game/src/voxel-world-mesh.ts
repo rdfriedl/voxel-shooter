@@ -26,9 +26,38 @@ export class VoxelWorldMesh extends Group {
   }
 }
 
+const FACE = {
+  NX: 1 << 0,
+  PX: 1 << 1,
+  NY: 1 << 2,
+  PY: 1 << 3,
+  NZ: 1 << 4,
+  PZ: 1 << 5,
+};
+function* voxelFaceGenerator(chunk: VoxelChunk) {
+  const size = chunk.size;
+  const offsety = size.x;
+  const offsetz = size.x * size.y;
+  const data = chunk.data;
+
+  for (const [v, color] of chunk) {
+    const { x, y, z } = v;
+    if (color === 0) continue;
+
+    const index = x + y * offsety + z * offsetz;
+    let faces = 0;
+    if (data[index + 1] === 0 || x === size.x - 1) faces |= FACE.PX;
+    if (data[index - 1] === 0 || x === 0) faces |= FACE.NX;
+    if (data[index + offsety] === 0 || y === size.y - 1) faces |= FACE.PY;
+    if (data[index - offsety] === 0 || y === 0) faces |= FACE.NY;
+    if (data[index + offsetz] === 0 || z === size.z - 1) faces |= FACE.PZ;
+    if (data[index - offsetz] === 0 || z === 0) faces |= FACE.NZ;
+    if (faces !== 0) yield [v, color, faces] as const;
+  }
+}
+
 class VOXMesh extends Mesh {
   constructor(chunk: VoxelChunk) {
-    const size = chunk.size;
     const palette = chunk.world.palette;
 
     const vertices: number[] = [];
@@ -48,30 +77,25 @@ class VOXMesh extends Mesh {
       }
     }
 
-    // Store data in a volume for sampling
-    const offsety = size.x;
-    const offsetz = size.x * size.y;
-    const array = chunk.data;
+    const generator = voxelFaceGenerator(chunk);
 
     // Construct geometry
     let hasColors = false;
-    for (const [v, c] of chunk) {
+    for (const [v, color, faces] of generator) {
       const { x, y, z } = v;
-      if (c === 0) continue;
-      const hex = palette[c];
+      const hex = palette[color];
       const r = ((hex >> 0) & 0xff) / 0xff;
       const g = ((hex >> 8) & 0xff) / 0xff;
       const b = ((hex >> 16) & 0xff) / 0xff;
 
       if (r > 0 || g > 0 || b > 0) hasColors = true;
 
-      const index = x + y * offsety + z * offsetz;
-      if (array[index + 1] === 0 || x === size.x - 1) add(px, x, y, z, r, g, b);
-      if (array[index - 1] === 0 || x === 0) add(nx, x, y, z, r, g, b);
-      if (array[index + offsety] === 0 || y === size.y - 1) add(py, x, y, z, r, g, b);
-      if (array[index - offsety] === 0 || y === 0) add(ny, x, y, z, r, g, b);
-      if (array[index + offsetz] === 0 || z === size.z - 1) add(pz, x, y, z, r, g, b);
-      if (array[index - offsetz] === 0 || z === 0) add(nz, x, y, z, r, g, b);
+      if (faces & FACE.PX) add(px, x, y, z, r, g, b);
+      if (faces & FACE.NX) add(nx, x, y, z, r, g, b);
+      if (faces & FACE.PY) add(py, x, y, z, r, g, b);
+      if (faces & FACE.NY) add(ny, x, y, z, r, g, b);
+      if (faces & FACE.PZ) add(pz, x, y, z, r, g, b);
+      if (faces & FACE.NZ) add(nz, x, y, z, r, g, b);
     }
 
     const geometry = new BufferGeometry();
