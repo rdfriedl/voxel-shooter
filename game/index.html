@@ -11,6 +11,19 @@
         height: 100%;
         overflow: hidden;
       }
+
+      /* tmp crosshair */
+      body:after {
+        content: "";
+        width: 4px;
+        height: 4px;
+        background-color: red;
+        position: fixed;
+        top: 50vh;
+        left: 50vw;
+        transform: translate(-50%, -50%);
+        border-radius: 50%;
+      }
     </style>
   </head>
   <body>

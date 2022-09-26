@@ -7,6 +7,8 @@ export class VoxelChunk {
   data: Uint8Array;
   world: VoxelWorld;
 
+  dirty: boolean = false;
+
   constructor(size: number, world: VoxelWorld) {
     this.size = new Vector3(size, size, size);
     if (size < 1) throw new Error("size must be greater than 1");
@@ -30,6 +32,7 @@ export class VoxelChunk {
       throw new Error("out of bounds");
     }
     this.data[vecToIndex(vec, this.size)] = value;
+    this.dirty = true;
   }
 
   get isEmpty() {

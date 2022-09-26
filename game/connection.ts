@@ -1,22 +1,20 @@
 import { Client, Room } from "colyseus.js";
+import { Vector3 } from "three";
 import { State } from "../common/schema";
-const client = new Client("ws://localhost:5000");
-let room: Room<State> | null = null;
 
-export function getRoom() {
-  return room;
-}
+const client = new Client(
+  import.meta.env.DEV ? "ws://localhost:2567" : location.protocol.replace("http", "ws") + "//" + location.host
+);
+
+let room: Room<State> | null = null;
 
 export async function connect() {
   try {
     room = await client.joinOrCreate("my_room", {}, State);
-    if (!room) return;
 
-    room.onStateChange((newState) => {
-      if (!room) return;
-      console.log("New state:", newState);
-      console.log(newState.timeLeft);
-      console.log(newState.players.get(room.sessionId));
+    room.onStateChange((state) => {
+      console.log("New state:", state);
+      console.log(state.timeLeft);
     });
 
     room.state.players.onAdd = (player, key) => {
@@ -29,7 +27,18 @@ export async function connect() {
     });
 
     room.onMessage("hello", (message) => console.log(message));
+
+    if (import.meta.env.DEV) {
+      // @ts-ignore
+      window.room = room;
+    }
   } catch (e) {
     console.error("Couldn't connect:", e);
   }
+}
+
+export function sendPlayerPosition(position: Vector3, velocity: Vector3) {
+  if (!room) return;
+
+  room.send("position", { position, velocity });
 }

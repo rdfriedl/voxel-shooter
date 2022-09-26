@@ -8,11 +8,14 @@ export class VoxelWorld {
   chunks: VoxelChunk[] = [];
   chunkSize: number;
   palette: number[];
+  voxelSize: Vector3;
 
   constructor(chunkSize: number, size: Vector3, palette = DEFAULT_PALETTE) {
     this.size = size;
     this.chunkSize = chunkSize;
     this.palette = palette;
+
+    this.voxelSize = size.clone().multiplyScalar(chunkSize);
   }
 
   isChunkOutOfBounds(vec: Vector3) {
@@ -20,12 +23,7 @@ export class VoxelWorld {
   }
   isVoxelOutOfBounds(vec: Vector3) {
     return (
-      vec.x < 0 ||
-      vec.y < 0 ||
-      vec.z < 0 ||
-      vec.x >= this.size.x * this.chunkSize ||
-      vec.y >= this.size.y * this.chunkSize ||
-      vec.z >= this.size.z * this.chunkSize
+      vec.x < 0 || vec.y < 0 || vec.z < 0 || vec.x >= this.voxelSize.x || vec.y >= this.voxelSize.y || vec.z >= this.voxelSize.z
     );
   }
 

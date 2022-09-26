@@ -1,10 +1,10 @@
-import * as THREE from "three";
-
 import { connect } from "./connection";
 
-await connect();
-import "./scene";
+connect().then(() => {
+  import("./scene");
+});
 
+import * as THREE from "three";
 if (import.meta.env.DEV) {
   window.THREE = THREE;
 }
