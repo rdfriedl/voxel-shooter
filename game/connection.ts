@@ -14,7 +14,6 @@ export async function connect() {
 
     room.onStateChange((state) => {
       console.log("New state:", state);
-      console.log(state.timeLeft);
     });
 
     room.state.players.onAdd = (player, key) => {
