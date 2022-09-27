@@ -78,16 +78,25 @@ export function readVoxModelChunks(buffer: ArrayBuffer) {
 }
 export function readVoxChunksIntoWorld(chunks: VoxChunk[], world: VoxelWorld) {
   const v = new Vector3();
+  const set = (x, y, z, c) => {
+    v.set(y, z, x);
+    world.setVoxel(v, c);
+  };
   for (const chunk of chunks) {
     for (let i = 0; i < chunk.data.length; i += 4) {
-      const x = chunk.data[i + 0];
-      const y = chunk.data[i + 1];
-      const z = chunk.data[i + 2];
+      const x = chunk.data[i + 0] * 2;
+      const y = chunk.data[i + 1] * 2;
+      const z = chunk.data[i + 2] * 2;
       const c = chunk.data[i + 3];
 
-      v.set(y, z, x);
-
-      world.setVoxel(v, c);
+      set(x, y, z, c);
+      set(x, y + 1, z, c);
+      set(x, y, z + 1, c);
+      set(x + 1, y, z, c);
+      set(x + 1, y + 1, z, c);
+      set(x + 1, y + 1, z + 1, c);
+      set(x, y + 1, z + 1, c);
+      set(x + 1, y, z + 1, c);
     }
 
     world.palette = chunk.palette;

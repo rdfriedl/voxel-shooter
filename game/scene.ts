@@ -24,7 +24,7 @@ const stats = Stats();
 document.body.appendChild(stats.dom);
 
 const clock = new Clock();
-const voxelWorld = new VoxelWorld(16, new Vector3(16, 16, 16));
+const voxelWorld = new VoxelWorld(16, new Vector3(32, 32, 32));
 
 const camera = new PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 500);
 camera.position.set(0.175, 0.075, 0.175);
@@ -106,7 +106,7 @@ loader.load("/models/level.vox", (buffer) => {
 
 let canShoot = true;
 
-const raycaster = new Raycaster(new Vector3(), new Vector3(0, -1, 0), 0, 8);
+const raycaster = new Raycaster(new Vector3(), new Vector3(0, -1, 0), 0, 10);
 const velocity = new Vector3();
 const direction = new Vector3();
 let canJump = true;
@@ -176,11 +176,16 @@ function animate() {
     }
 
     if (mouseButtonStates[0] && canShoot) {
-      bulletManager.createBullet(camera.position, controls.getDirection(new Vector3()).multiplyScalar(400));
+      const v = controls.getDirection(new Vector3());
+      v.x += (Math.random() - 0.5) / 20;
+      v.y += (Math.random() - 0.5) / 20;
+      v.z += (Math.random() - 0.5) / 20;
+      v.normalize().multiplyScalar(400);
+      bulletManager.createBullet(camera.position, v);
       canShoot = false;
       setTimeout(() => {
         canShoot = true;
-      }, 120);
+      }, 100);
     }
   }
 
