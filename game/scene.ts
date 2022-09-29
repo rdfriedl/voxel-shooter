@@ -1,6 +1,6 @@
 import { Clock, DirectionalLight, FileLoader, HemisphereLight, Vector3 } from "three";
 
-import { readVoxChunksIntoWorld, readVoxModelChunks } from "../common/utils/vox-loader";
+// import { readVoxChunksIntoWorld, readVoxModelChunks } from "../common/utils/vox-loader";
 import { SceneSystem } from "./systems/scene";
 import { Movement } from "./components/movement";
 import { BulletTag, InSceneTag, LocalPlayerTag, PlayerCollisionTag, RemotePlayerTag } from "./components/tags";
@@ -12,6 +12,7 @@ import { Object3DComponent } from "./components/object3D";
 import { PositionSyncSystem } from "./systems/position-sync";
 import { PlayerMovementSystem } from "./systems/player-movement";
 import { ExtendedWorld } from "./utils/extended-world";
+import { VoxelWorldSyncSystem } from "./systems/voxel-world-sync";
 
 const world = new ExtendedWorld();
 
@@ -33,6 +34,7 @@ world
   .registerSystem(PlayerMovementSystem)
   .registerSystem(PositionSyncSystem)
   .registerSystem(VoxelWorldSystem, { size: new Vector3(32, 32, 32) })
+  .registerSystem(VoxelWorldSyncSystem)
   .registerSystem(RenderSystem, { priority: 999 })
   .registerSystem(StatsSystem, { priority: 1000 });
 
@@ -60,15 +62,15 @@ dirLight2.position.set(-1.5, -3, -2.5);
 scene.add(dirLight2);
 
 // load the map
-const loader = new FileLoader();
-loader.setResponseType("arraybuffer");
-loader.load("/models/level.vox", (buffer) => {
-  if (buffer instanceof ArrayBuffer) {
-    const voxelWorldSystem = world.getSystem(VoxelWorldSystem);
-    const chunks = readVoxModelChunks(buffer);
-    readVoxChunksIntoWorld(chunks, voxelWorldSystem.voxelWorld);
-  }
-});
+// const loader = new FileLoader();
+// loader.setResponseType("arraybuffer");
+// loader.load("/models/level.vox", (buffer) => {
+//   if (buffer instanceof ArrayBuffer) {
+//     const voxelWorldSystem = world.getSystem(VoxelWorldSystem);
+//     const chunks = readVoxModelChunks(buffer);
+//     readVoxChunksIntoWorld(chunks, voxelWorldSystem.voxelWorld);
+//   }
+// });
 
 function animate() {
   const now = new Date().valueOf();

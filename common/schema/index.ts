@@ -1,4 +1,4 @@
-import { MapSchema, Schema, type } from "@colyseus/schema";
+import { ArraySchema, MapSchema, Schema, type } from "@colyseus/schema";
 
 export class Vector extends Schema {
   @type("number") x = 0;
@@ -14,6 +14,8 @@ export class Player extends Schema {
 
 export class State extends Schema {
   @type({ map: Player }) players = new MapSchema<Player>();
+  @type({ map: "string" }) chunks = new MapSchema<string>();
+  @type(["number"]) palette = new ArraySchema<number>();
 
   // createPlayer(sessionId: string) {
   //   const player = new Player();

@@ -1,8 +1,8 @@
-// import { connect } from "./connection";
+import { connect } from "./connection";
 
-// connect().then(() => {
-import("./scene");
-// });
+connect().then(() => {
+  import("./scene");
+});
 
 import * as THREE from "three";
 if (import.meta.env.DEV) {

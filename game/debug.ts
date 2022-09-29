@@ -1,3 +1,4 @@
+import { getCurrentState } from "./connection";
 import { SceneSystem } from "./systems/scene";
 import { ExtendedWorld } from "./utils/extended-world";
 
@@ -16,6 +17,9 @@ export function setup(world: ExtendedWorld) {
     },
     get player() {
       return world.getEntityByName("Player");
+    },
+    get schema() {
+      return getCurrentState();
     },
   };
 }

@@ -18,13 +18,11 @@ export class SceneSystem extends System {
     this.queries.entities.added?.forEach((entity) => {
       const object = entity.getComponent(Object3DComponent)?.object;
       if (!object) return;
-      console.log("adding", object);
       this.scene.add(object);
     });
     this.queries.entities.removed?.forEach((entity) => {
       const object = entity.getComponent(Object3DComponent)?.object;
       if (!object) return;
-      console.log("removing", object);
       this.scene.remove(object);
     });
   }

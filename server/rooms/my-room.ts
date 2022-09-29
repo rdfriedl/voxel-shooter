@@ -1,11 +1,17 @@
-// rooms/MyRoom.ts (server-side, room file)
+import fs from "fs";
+import path from "path";
 import { Client, Room } from "colyseus";
+import { Vector3 } from "three";
 import { Player, State } from "../../common/schema";
+import { readVoxChunksIntoWorld, readVoxModelChunks } from "../../common/utils/vox-loader";
+import { VoxelWorld } from "../../common/voxel";
 
 export class MyRoom extends Room<State> {
   // number of clients per room
-  // (colyseus will create the room instances for you)
-  maxClients = 10;
+  maxClients = 20;
+
+  timer: NodeJS.Timer | undefined;
+  voxelWorld: VoxelWorld = new VoxelWorld(16, new Vector3(16, 16, 16));
 
   // room has been created: bring your own logic
   async onCreate(options) {
@@ -28,6 +34,23 @@ export class MyRoom extends Room<State> {
     });
 
     this.onMessage("shoot", this.handleShoot);
+
+    this.timer = setInterval(this.execute.bind(this), 1000 / 60);
+
+    this.loadLevel();
+  }
+
+  loadLevel() {
+    console.log("Loading vox level");
+    const voxFile = fs.readFileSync(path.join(__dirname, "../maps/level.vox"));
+    const array = new ArrayBuffer(voxFile.length);
+    const typedArray = new Uint8Array(array);
+    for (let i = 0; i < voxFile.length; i++) {
+      typedArray[i] = voxFile[i];
+    }
+    const chunks = readVoxModelChunks(array);
+    readVoxChunksIntoWorld(chunks, this.voxelWorld);
+    this.voxelWorld.palette.forEach((c, i) => (this.state.palette[i] = c));
   }
 
   handleShoot(client: Client, message: any) {
@@ -39,11 +62,21 @@ export class MyRoom extends Room<State> {
     }
   }
 
+  execute() {
+    for (const [v, chunk] of this.voxelWorld) {
+      if (chunk.dirty) {
+        v.getComponent;
+        const key = v.toArray().join("-");
+        this.state.chunks.set(key, chunk.encode());
+        chunk.dirty = false;
+      }
+    }
+  }
+
   onAuth(client, options, req) {
     return true;
   }
 
-  // client joined: bring your own logic
   async onJoin(client: Client) {
     console.log("creating player for", client.sessionId);
     this.state.players.set(client.sessionId, new Player());
@@ -51,12 +84,12 @@ export class MyRoom extends Room<State> {
     client.send("hello", `hello ${client.sessionId}`);
   }
 
-  // client left: bring your own logic
   async onLeave(client: Client) {
     console.log(`player ${client.sessionId} left`);
     this.state.players.delete(client.sessionId);
   }
 
-  // room has been disposed: bring your own logic
-  async onDispose() {}
+  async onDispose() {
+    clearTimeout(this.timer);
+  }
 }

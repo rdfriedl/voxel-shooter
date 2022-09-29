@@ -1,6 +1,6 @@
 import { Vector3 } from "three";
 import { DEFAULT_PALETTE } from "../../game/utils/color";
-import { vecToIndex } from "../utils/3d-array";
+import { indexToVec, vecToIndex } from "../utils/3d-array";
 import { VoxelChunk } from "./voxel-chunk";
 
 export class VoxelWorld {
@@ -18,6 +18,13 @@ export class VoxelWorld {
     this.voxelSize = size.clone().multiplyScalar(chunkSize);
   }
 
+  getChunkIndex(v: Vector3) {
+    return vecToIndex(v, this.size);
+  }
+  getChunkVector(index: number) {
+    return indexToVec(index, this.size);
+  }
+
   isChunkOutOfBounds(vec: Vector3) {
     return vec.x < 0 || vec.y < 0 || vec.z < 0 || vec.x >= this.size.x || vec.y >= this.size.y || vec.z >= this.size.z;
   }
@@ -29,7 +36,7 @@ export class VoxelWorld {
 
   getChunk(vec: Vector3, create = true) {
     if (this.isChunkOutOfBounds(vec)) return;
-    const index = vecToIndex(vec, this.size);
+    const index = this.getChunkIndex(vec);
     if (!this.chunks[index] && create) {
       this.chunks[index] = new VoxelChunk(this.chunkSize, this);
     }
@@ -59,7 +66,7 @@ export class VoxelWorld {
         for (let x = 0; x < this.size.x; x++) {
           v.set(x, y, z);
           if (this.chunks[i]) {
-            yield [v, this.chunks[i]] as const;
+            yield [v, this.chunks[i], i] as const;
           }
           i++;
         }

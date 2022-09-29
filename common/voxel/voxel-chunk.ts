@@ -1,6 +1,14 @@
+import { deflate, inflate } from "pako";
 import { Vector3 } from "three";
 import { vecToIndex } from "../utils/3d-array";
 import { VoxelWorld } from "./voxel-world";
+
+function bufferToString(buffer: ArrayBuffer) {
+  return String.fromCharCode(...new Uint8Array(buffer));
+}
+function stringToBuffer(string: string) {
+  return Uint8Array.from(string.split("").map((ch) => ch.charCodeAt(0)));
+}
 
 export class VoxelChunk {
   size: Vector3;
@@ -51,6 +59,20 @@ export class VoxelChunk {
         }
       }
     }
+  }
+
+  encode() {
+    // const decoder = new TextDecoder();
+    // return decoder.decode(deflate(this.data));
+    return bufferToString(deflate(this.data));
+  }
+  decode(data: string) {
+    // const encoder = new TextEncoder();
+    // this.data = inflate(encoder.encode(data));
+    const newData = inflate(stringToBuffer(data));
+    if (newData.length !== this.data.length) throw new Error("data is wrong length");
+    this.data = newData;
+    this.dirty = true;
   }
 }
 
