@@ -26,6 +26,17 @@ export class MyRoom extends Room<State> {
         console.log("missing player for " + client.sessionId);
       }
     });
+
+    this.onMessage("shoot", this.handleShoot);
+  }
+
+  handleShoot(client: Client, message: any) {
+    const player = this.state.players.get(client.sessionId);
+    if (!player) return;
+
+    for (const other of this.clients) {
+      other.send("new-bullet", message);
+    }
   }
 
   onAuth(client, options, req) {

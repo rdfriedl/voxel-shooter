@@ -1,5 +1,5 @@
 import { Vector3 } from "three";
-import { DEFAULT_PALETTE } from "../../game/color";
+import { DEFAULT_PALETTE } from "../../game/utils/color";
 import { VoxelWorld } from "../voxel";
 
 export type VoxChunk = {

@@ -3,15 +3,10 @@ import { vecToIndex } from "../../common/utils/3d-array";
 import { VoxelChunk, VoxelWorld, FACE, voxelFaceGenerator } from "../../common/voxel";
 
 export class VoxelWorldMesh extends Group {
-  world: VoxelWorld;
+  world: VoxelWorld | undefined;
   chunks: VoxelChunkMesh[] = [];
-  constructor(world: VoxelWorld) {
-    super();
-
-    this.world = world;
-  }
-
   update() {
+    if (!this.world) return;
     for (const [v, chunk] of this.world) {
       const index = vecToIndex(v, this.world.size);
       if (!this.chunks[index] || chunk.dirty) {
@@ -22,6 +17,11 @@ export class VoxelWorldMesh extends Group {
         chunk.dirty = false;
       }
     }
+  }
+
+  copy(source: this, recursive?: boolean | undefined): this {
+    this.world = source.world;
+    return this;
   }
 }
 

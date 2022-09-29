@@ -38,6 +38,10 @@ export async function connect() {
 
 export function sendPlayerPosition(position: Vector3, velocity: Vector3) {
   if (!room) return;
-
   room.send("position", { position, velocity });
+}
+
+export function shoot(bullets: [Vector3, Vector3][]) {
+  if (!room) return;
+  room.send("position", bullets);
 }
