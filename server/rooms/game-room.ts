@@ -6,12 +6,12 @@ import { Player, State } from "../../common/schema";
 import { readVoxChunksIntoWorld, readVoxModelChunks } from "../../common/utils/vox-loader";
 import { VoxelWorld } from "../../common/voxel";
 
-export class MyRoom extends Room<State> {
+export class GameRoom extends Room<State> {
   // number of clients per room
   maxClients = 20;
 
   timer: NodeJS.Timer | undefined;
-  voxelWorld: VoxelWorld = new VoxelWorld(16, new Vector3(16, 16, 16));
+  voxelWorld: VoxelWorld = new VoxelWorld(16, new Vector3(32, 32, 32));
 
   // room has been created: bring your own logic
   async onCreate(options) {
@@ -41,7 +41,6 @@ export class MyRoom extends Room<State> {
   }
 
   loadLevel() {
-    console.log("Loading vox level");
     const voxFile = fs.readFileSync(path.join(__dirname, "../maps/level.vox"));
     const array = new ArrayBuffer(voxFile.length);
     const typedArray = new Uint8Array(array);
@@ -49,8 +48,9 @@ export class MyRoom extends Room<State> {
       typedArray[i] = voxFile[i];
     }
     const chunks = readVoxModelChunks(array);
+    this.state.world.size.copy(this.voxelWorld.size);
     readVoxChunksIntoWorld(chunks, this.voxelWorld);
-    this.voxelWorld.palette.forEach((c, i) => (this.state.palette[i] = c));
+    this.voxelWorld.palette.forEach((c, i) => (this.state.world.palette[i] = c));
   }
 
   handleShoot(client: Client, message: any) {
@@ -67,7 +67,7 @@ export class MyRoom extends Room<State> {
       if (chunk.dirty) {
         v.getComponent;
         const key = v.toArray().join("-");
-        this.state.chunks.set(key, chunk.encode());
+        this.state.world.chunks.set(key, chunk.encode());
         chunk.dirty = false;
       }
     }

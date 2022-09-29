@@ -33,7 +33,7 @@ world
   .registerSystem(ControlsSystem)
   .registerSystem(PlayerMovementSystem)
   .registerSystem(PositionSyncSystem)
-  .registerSystem(VoxelWorldSystem, { size: new Vector3(32, 32, 32) })
+  .registerSystem(VoxelWorldSystem)
   .registerSystem(VoxelWorldSyncSystem)
   .registerSystem(RenderSystem, { priority: 999 })
   .registerSystem(StatsSystem, { priority: 1000 });

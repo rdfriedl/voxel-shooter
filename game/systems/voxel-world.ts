@@ -12,7 +12,7 @@ export class VoxelWorldSystem extends System {
   constructor(world, attrs) {
     super(world, attrs);
 
-    this.voxelWorld = new VoxelWorld(16, attrs.size || new Vector3(16, 16, 16));
+    this.voxelWorld = new VoxelWorld(16, attrs?.size || new Vector3(8, 8, 8));
     const worldMesh = new VoxelWorldMesh();
     worldMesh.world = this.voxelWorld;
 

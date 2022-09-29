@@ -10,7 +10,7 @@ let room: Room<State> | null = null;
 
 export async function connect() {
   try {
-    room = await client.joinOrCreate("my_room", {}, State);
+    room = await client.joinOrCreate("game-room", {}, State);
 
     room.state.players.onAdd = (player, key) => {
       console.log(player, key);

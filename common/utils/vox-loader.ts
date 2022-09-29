@@ -68,8 +68,6 @@ export function readVoxModelChunks(buffer: ArrayBuffer) {
       // @ts-ignore
       chunk.palette = palette;
     } else {
-      // console.log( id, chunkSize, childChunks );
-
       i += chunkSize;
     }
   }
@@ -78,10 +76,7 @@ export function readVoxModelChunks(buffer: ArrayBuffer) {
 }
 export function readVoxChunksIntoWorld(chunks: VoxChunk[], world: VoxelWorld) {
   const v = new Vector3();
-  const set = (x, y, z, c) => {
-    v.set(y, z, x);
-    world.setVoxel(v, c);
-  };
+  const set = (x, y, z, c) => world.setVoxel(v.set(y, z, x), c);
   for (const chunk of chunks) {
     for (let i = 0; i < chunk.data.length; i += 4) {
       const x = chunk.data[i + 0] * 2;

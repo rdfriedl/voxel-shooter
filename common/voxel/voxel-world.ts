@@ -58,6 +58,21 @@ export class VoxelWorld {
     chunk.setVoxel(vec.clone().sub(chunkCords.multiplyScalar(this.chunkSize)), value);
   }
 
+  resize(newSize: Vector3) {
+    const newChunks: VoxelChunk[] = [];
+    for (let i = 0; i < this.chunks.length; i++) {
+      if (this.chunks[i]) {
+        const v = indexToVec(i, this.size);
+        if (v.x < newSize.x && v.y < newSize.y && v.z < newSize.z) {
+          newChunks[vecToIndex(v, newSize)] = this.chunks[i];
+        }
+      }
+    }
+    this.chunks = newChunks;
+    this.size.copy(newSize);
+    this.voxelSize.copy(this.size).multiplyScalar(this.chunkSize);
+  }
+
   *[Symbol.iterator]() {
     const v = new Vector3();
     let i = 0;

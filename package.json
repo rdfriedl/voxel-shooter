@@ -2,14 +2,16 @@
   "name": "voxel-shooter",
   "private": true,
   "scripts": {
-    "format": "prettier -w .",
-    "build": "concurrently yarn:build:types yarn:build:game yarn:build:server",
+    "start": "node dist/server/index.js",
+    "build": "concurrently yarn:build:types yarn:build:game yarn:build:server yarn:build:maps",
     "build:types": "tsc",
-    "build:game": "vite build game --outDir ../dist/game",
+    "build:game": "vite build game --outDir ../dist/game --emptyOutDir",
     "build:server": "tsc -p tsconfig.server.json",
+    "build:maps": "cp -r server/maps dist/server",
     "dev": "concurrently yarn:dev:game yarn:dev:server",
     "dev:game": "vite game",
-    "dev:server": "ts-node-dev --project tsconfig.server.json server/index.ts"
+    "dev:server": "ts-node-dev --project tsconfig.server.json server/index.ts",
+    "format": "prettier -w ."
   },
   "dependencies": {
     "@colyseus/arena": "^0.14.24",
