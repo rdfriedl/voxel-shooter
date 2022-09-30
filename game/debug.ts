@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { Entity } from "ecsy";
 import { RemotePlayerTag } from "./components/tags";
-import { getCurrentState } from "./connection";
+import { getRoom } from "./connection";
 import { SceneSystem } from "./systems/scene";
 import { VoxelWorldSystem } from "./systems/voxel-world";
 import { ExtendedWorld } from "./utils/extended-world";
@@ -25,7 +25,7 @@ export function setup(world: ExtendedWorld) {
       return world.getEntityByName("Player");
     },
     get schema() {
-      return getCurrentState();
+      return getRoom()?.state;
     },
     get voxelWorld() {
       return world.getSystem(VoxelWorldSystem).voxelWorld;

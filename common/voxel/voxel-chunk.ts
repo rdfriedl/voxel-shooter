@@ -18,7 +18,7 @@ export class VoxelChunk {
 
   dirty: boolean = false;
 
-  constructor(size: number, world: VoxelWorld, position:Vector3) {
+  constructor(size: number, world: VoxelWorld, position: Vector3) {
     this.size = new Vector3(size, size, size);
     if (size < 1) throw new Error("size must be greater than 1");
 

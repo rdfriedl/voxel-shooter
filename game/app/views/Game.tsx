@@ -8,6 +8,7 @@ export const GameView = () => {
     const game = new Game();
 
     container?.appendChild(game.domElement);
+    game.play();
 
     return () => game.stop();
   }, []);
