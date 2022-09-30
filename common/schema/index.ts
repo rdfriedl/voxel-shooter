@@ -13,6 +13,7 @@ export class Vector extends Schema {
 }
 
 export class Player extends Schema {
+  @type("string") id = "";
   @type("number") health = 100;
   @type(Vector) position = new Vector();
   @type(Vector) velocity = new Vector();

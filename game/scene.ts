@@ -10,9 +10,11 @@ import { StatsSystem } from "./systems/stats";
 import { VoxelWorldSystem } from "./systems/voxel-world";
 import { Object3DComponent } from "./components/object3D";
 import { PositionSyncSystem } from "./systems/position-sync";
-import { PlayerMovementSystem } from "./systems/player-movement";
+import { PlayerController } from "./systems/player-controller";
 import { ExtendedWorld } from "./utils/extended-world";
 import { VoxelWorldSyncSystem } from "./systems/voxel-world-sync";
+import { RemotePlayerSystem } from "./systems/remote-players";
+import { RemotePlayerMovementSystem } from "./systems/remote-player-movement";
 
 const world = new ExtendedWorld();
 
@@ -31,7 +33,9 @@ world
 world
   .registerSystem(SceneSystem)
   .registerSystem(ControlsSystem)
-  .registerSystem(PlayerMovementSystem)
+  .registerSystem(PlayerController)
+  .registerSystem(RemotePlayerSystem)
+  .registerSystem(RemotePlayerMovementSystem)
   .registerSystem(PositionSyncSystem)
   .registerSystem(VoxelWorldSystem)
   .registerSystem(VoxelWorldSyncSystem)

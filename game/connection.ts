@@ -12,10 +12,6 @@ export async function connect() {
   try {
     room = await client.joinOrCreate("game-room", {}, State);
 
-    room.state.players.onAdd = (player, key) => {
-      console.log(player, key);
-    };
-
     room.onLeave((code) => {
       console.log("You've been disconnected.");
       room = null;

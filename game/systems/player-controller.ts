@@ -3,12 +3,32 @@ import { Object3D, Raycaster, Vector3 } from "three";
 import { Movement } from "../components/movement";
 import { Object3DComponent } from "../components/object3D";
 import { LocalPlayerTag, PlayerCollisionTag } from "../components/tags";
-import { keyStates } from "../utils/key-states";
+import { getRoom } from "../connection";
+import { keyStates, mouseButtonStates } from "../utils/key-states";
 import { ControlsSystem } from "./controls";
 
-export class PlayerMovementSystem extends System {
+export class PlayerController extends System {
   raycaster = new Raycaster(new Vector3(), new Vector3(0, -1, 0), 0, 10);
   canJump = false;
+  canShoot = true;
+  interval: NodeJS.Timer | undefined;
+  init() {
+    this.interval = setInterval(() => {
+      const room = getRoom();
+
+      const player = this.queries.player.results[0];
+      const movement = player.getComponent(Movement);
+      if (!movement || !room) return;
+
+      room.send("position", {
+        position: movement.position,
+        velocity: movement.velocity,
+      });
+    }, 1000 / 30);
+  }
+  stop() {
+    if (this.interval) clearInterval(this.interval);
+  }
   execute(delta: number, time: number) {
     const direction = new Vector3();
     const controls = this.world.getSystem(ControlsSystem).controls;
@@ -73,42 +93,23 @@ export class PlayerMovementSystem extends System {
           position.y = 100;
         }
 
-        // if (mouseButtonStates[0] && canShoot) {
-        //   const v = controls.getDirection(new Vector3());
-        //   v.x += (Math.random() - 0.5) / 40;
-        //   v.y += (Math.random() - 0.5) / 40;
-        //   v.z += (Math.random() - 0.5) / 40;
-        //   v.normalize().multiplyScalar(400);
-        //   bulletManager.createBullet(camera.position, v);
-        //   shoot([[camera.position, v]]);
-        //   canShoot = false;
-        //   setTimeout(() => {
-        //     canShoot = true;
-        //   }, 100);
-        // }
-        // if (mouseButtonStates[1] && canShoot) {
-        //   const bullets: [Vector3, Vector3][] = [];
-        //   for (let i = 0; i < 12; i++) {
-        //     const v = controls.getDirection(new Vector3());
-        //     v.x += (Math.random() - 0.5) / 20;
-        //     v.y += (Math.random() - 0.5) / 20;
-        //     v.z += (Math.random() - 0.5) / 20;
-        //     v.normalize().multiplyScalar(400);
-        //     bulletManager.createBullet(camera.position, v);
-        //     bullets.push([camera.position, v]);
-        //   }
-        //   shoot(bullets);
-        //   canShoot = false;
-        //   setTimeout(() => {
-        //     canShoot = true;
-        //   }, 500);
-        // }
+        if (mouseButtonStates[0] && this.canShoot) {
+          getRoom()?.send("shoot", {
+            position: camera.position.toArray(),
+            direction: controls.getDirection(new Vector3()).toArray(),
+          });
+
+          this.canShoot = false;
+          setTimeout(() => {
+            this.canShoot = true;
+          }, 50);
+        }
       }
     });
   }
 }
 
-PlayerMovementSystem.queries = {
+PlayerController.queries = {
   player: {
     components: [LocalPlayerTag, Movement],
   },

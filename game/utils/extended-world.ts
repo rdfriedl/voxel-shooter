@@ -5,4 +5,9 @@ export class ExtendedWorld extends World {
     // @ts-ignore
     return this.entityManager.getEntityByName(name);
   }
+
+  getEntities() {
+    // @ts-ignore
+    return this.entityManager._entities;
+  }
 }

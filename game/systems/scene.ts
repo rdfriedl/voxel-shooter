@@ -21,7 +21,7 @@ export class SceneSystem extends System {
       this.scene.add(object);
     });
     this.queries.entities.removed?.forEach((entity) => {
-      const object = entity.getComponent(Object3DComponent)?.object;
+      const object = entity.getRemovedComponent(Object3DComponent)?.object;
       if (!object) return;
       this.scene.remove(object);
     });

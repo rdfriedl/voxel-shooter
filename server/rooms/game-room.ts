@@ -1,17 +1,19 @@
 import fs from "fs";
 import path from "path";
-import { Client, Room } from "colyseus";
+import { Client, Delayed, Room } from "colyseus";
 import { Vector3 } from "three";
 import { Player, State } from "../../common/schema";
 import { readVoxChunksIntoWorld, readVoxModelChunks } from "../../common/utils/vox-loader";
 import { VoxelWorld } from "../../common/voxel";
+import { BulletManager } from "../../common/bullets/core";
 
 export class GameRoom extends Room<State> {
   // number of clients per room
   maxClients = 20;
 
-  timer: NodeJS.Timer | undefined;
+  timer: Delayed | undefined;
   voxelWorld: VoxelWorld = new VoxelWorld(16, new Vector3(32, 32, 32));
+  bulletManager: BulletManager = new BulletManager(this.voxelWorld);
 
   // room has been created: bring your own logic
   async onCreate(options) {
@@ -33,9 +35,9 @@ export class GameRoom extends Room<State> {
       }
     });
 
-    this.onMessage("shoot", this.handleShoot);
+    this.onMessage("shoot", this.handleShoot.bind(this));
 
-    this.timer = setInterval(this.execute.bind(this), 1000 / 60);
+    this.timer = this.clock.setInterval(this.execute.bind(this), 1000 / 60);
 
     this.loadLevel();
   }
@@ -53,19 +55,26 @@ export class GameRoom extends Room<State> {
     this.voxelWorld.palette.forEach((c, i) => (this.state.world.palette[i] = c));
   }
 
-  handleShoot(client: Client, message: any) {
+  handleShoot(client: Client, message: { position: number[]; direction: number[] }) {
     const player = this.state.players.get(client.sessionId);
     if (!player) return;
 
-    for (const other of this.clients) {
-      other.send("new-bullet", message);
-    }
+    const p = new Vector3().fromArray(message.position);
+    const d = new Vector3().fromArray(message.direction);
+    this.bulletManager.createBullet(p, d);
+
+    // for (const other of this.clients) {
+    // other.send("new-bullet", message);
+    // }
   }
 
   execute() {
+    // update bullets
+    this.bulletManager.update(this.clock.deltaTime);
+
+    // update chunks
     for (const [v, chunk] of this.voxelWorld) {
       if (chunk.dirty) {
-        v.getComponent;
         const key = v.toArray().join("-");
         this.state.world.chunks.set(key, chunk.encode());
         chunk.dirty = false;
@@ -79,7 +88,9 @@ export class GameRoom extends Room<State> {
 
   async onJoin(client: Client) {
     console.log("creating player for", client.sessionId);
-    this.state.players.set(client.sessionId, new Player());
+    const player = new Player();
+    player.id = client.sessionId;
+    this.state.players.set(client.sessionId, player);
 
     client.send("hello", `hello ${client.sessionId}`);
   }
@@ -90,6 +101,6 @@ export class GameRoom extends Room<State> {
   }
 
   async onDispose() {
-    clearTimeout(this.timer);
+    this.timer?.clear();
   }
 }

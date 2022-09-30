@@ -1,3 +1,5 @@
+import { Entity } from "ecsy";
+import { RemotePlayerTag } from "./components/tags";
 import { getCurrentState } from "./connection";
 import { SceneSystem } from "./systems/scene";
 import { VoxelWorldSystem } from "./systems/voxel-world";
@@ -24,6 +26,9 @@ export function setup(world: ExtendedWorld) {
     },
     get voxelWorld() {
       return world.getSystem(VoxelWorldSystem).voxelWorld;
+    },
+    get remotePlayers() {
+      return world.getEntities().filter((e: Entity) => e.hasComponent(RemotePlayerTag));
     },
   };
 }
