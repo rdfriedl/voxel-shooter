@@ -43,7 +43,7 @@ export class GameRoom extends Room<State> {
   }
 
   loadLevel() {
-    const voxFile = fs.readFileSync(path.join(__dirname, "../maps/level.vox"));
+    const voxFile = fs.readFileSync(path.join(process.cwd(), "maps/level.vox"));
     const array = new ArrayBuffer(voxFile.length);
     const typedArray = new Uint8Array(array);
     for (let i = 0; i < voxFile.length; i++) {
