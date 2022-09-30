@@ -9,8 +9,6 @@ export class RenderSystem extends System {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
 
     window.addEventListener("resize", this.onWindowResize);
-
-    document.body.appendChild(this.renderer.domElement);
   }
   onWindowResize = () => {
     const width = window.innerWidth || 1;

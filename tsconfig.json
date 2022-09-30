@@ -14,7 +14,8 @@
     "noUnusedLocals": false,
     "noImplicitAny": false,
     "noEmit": true,
-    "outDir": "dist"
+    "outDir": "dist",
+    "jsx": "react"
   },
   "include": ["game", "common", "server"]
 }

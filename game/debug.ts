@@ -1,3 +1,4 @@
+import * as THREE from "three";
 import { Entity } from "ecsy";
 import { RemotePlayerTag } from "./components/tags";
 import { getCurrentState } from "./connection";
@@ -6,6 +7,8 @@ import { VoxelWorldSystem } from "./systems/voxel-world";
 import { ExtendedWorld } from "./utils/extended-world";
 
 export function setup(world: ExtendedWorld) {
+  window.THREE = THREE;
+
   const getScene = () => world.getSystem(SceneSystem).scene;
   const getCamera = () => world.getSystem(SceneSystem).camera;
 
