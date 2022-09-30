@@ -15,7 +15,7 @@
     "noImplicitAny": false,
     "noEmit": true,
     "outDir": "dist",
-    "jsx": "react"
+    "jsx": "react-jsx"
   },
   "include": ["game", "common", "server"]
 }
