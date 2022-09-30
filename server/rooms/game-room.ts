@@ -73,9 +73,8 @@ export class GameRoom extends Room<State> {
     this.bulletManager.update(this.clock.deltaTime);
 
     // update chunks
-    for (const [v, chunk] of this.voxelWorld) {
+    for (const [key, chunk] of this.voxelWorld) {
       if (chunk.dirty) {
-        const key = v.toArray().join("-");
         this.state.world.chunks.set(key, chunk.encode());
         chunk.dirty = false;
       }

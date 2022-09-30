@@ -1,11 +1,11 @@
 import { Vector3 } from "three";
 import { DEFAULT_PALETTE } from "../utils/color";
-import { indexToVec, vecToIndex } from "../utils/3d-array";
+import { indexToVec, vecToString } from "../utils/vector";
 import { VoxelChunk } from "./voxel-chunk";
 
 export class VoxelWorld {
   size: Vector3;
-  chunks: VoxelChunk[] = [];
+  chunks: Map<string, VoxelChunk> = new Map();
   chunkSize: number;
   palette: number[];
   voxelSize: Vector3;
@@ -18,8 +18,8 @@ export class VoxelWorld {
     this.voxelSize = size.clone().multiplyScalar(chunkSize);
   }
 
-  getChunkIndex(v: Vector3) {
-    return vecToIndex(v, this.size);
+  getChunkKey(v: Vector3) {
+    return vecToString(v);
   }
   getChunkVector(index: number) {
     return indexToVec(index, this.size);
@@ -36,11 +36,13 @@ export class VoxelWorld {
 
   getChunk(vec: Vector3, create = true) {
     if (this.isChunkOutOfBounds(vec)) return;
-    const index = this.getChunkIndex(vec);
-    if (!this.chunks[index] && create) {
-      this.chunks[index] = new VoxelChunk(this.chunkSize, this);
+    const key = this.getChunkKey(vec);
+    let chunk = this.chunks.get(key);
+    if (!chunk && create) {
+      chunk = new VoxelChunk(this.chunkSize, this, vec);
+      this.chunks.set(key, chunk);
     }
-    return this.chunks[index];
+    return chunk;
   }
 
   getVoxel(vec: Vector3) {
@@ -59,33 +61,19 @@ export class VoxelWorld {
   }
 
   resize(newSize: Vector3) {
-    const newChunks: VoxelChunk[] = [];
-    for (let i = 0; i < this.chunks.length; i++) {
-      if (this.chunks[i]) {
-        const v = indexToVec(i, this.size);
-        if (v.x < newSize.x && v.y < newSize.y && v.z < newSize.z) {
-          newChunks[vecToIndex(v, newSize)] = this.chunks[i];
-        }
-      }
-    }
-    this.chunks = newChunks;
     this.size.copy(newSize);
     this.voxelSize.copy(this.size).multiplyScalar(this.chunkSize);
-  }
 
-  *[Symbol.iterator]() {
-    const v = new Vector3();
-    let i = 0;
-    for (let z = 0; z < this.size.z; z++) {
-      for (let y = 0; y < this.size.y; y++) {
-        for (let x = 0; x < this.size.x; x++) {
-          v.set(x, y, z);
-          if (this.chunks[i]) {
-            yield [v, this.chunks[i], i] as const;
-          }
-          i++;
-        }
+    // remove chunks outside map
+    for (const [key, chunk] of this.chunks) {
+      const v = chunk.position;
+      if (v.x < newSize.x && v.y < newSize.y && v.z < newSize.z) {
+        this.chunks.delete(key);
       }
     }
+  }
+
+  [Symbol.iterator]() {
+    return this.chunks[Symbol.iterator]();
   }
 }

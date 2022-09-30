@@ -1,29 +1,5 @@
-import { BufferGeometry, Float32BufferAttribute, BufferAttribute, Group, Mesh, MeshStandardMaterial } from "three";
-import { vecToIndex } from "../../common/utils/3d-array";
-import { VoxelChunk, VoxelWorld, FACE, voxelFaceGenerator } from "../../common/voxel";
-
-export class VoxelWorldMesh extends Group {
-  world: VoxelWorld | undefined;
-  chunks: VoxelChunkMesh[] = [];
-  update() {
-    if (!this.world) return;
-    for (const [v, chunk] of this.world) {
-      const index = vecToIndex(v, this.world.size);
-      if (!this.chunks[index] || chunk.dirty) {
-        this.chunks[index]?.removeFromParent();
-        const mesh = (this.chunks[index] = new VoxelChunkMesh(chunk));
-        mesh.position.copy(v).multiply(chunk.size);
-        this.add(mesh);
-        chunk.dirty = false;
-      }
-    }
-  }
-
-  copy(source: this, recursive?: boolean | undefined): this {
-    this.world = source.world;
-    return this;
-  }
-}
+import { BufferGeometry, Float32BufferAttribute, BufferAttribute, Mesh, MeshStandardMaterial } from "three";
+import { VoxelChunk, FACE, voxelFaceGenerator } from "../../common/voxel";
 
 const nx = [0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 1, 0, 0, 0, 1];
 const px = [1, 0, 0, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0];
@@ -33,8 +9,17 @@ const pz = [0, 0, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1];
 const nz = [0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 1, 0, 0, 0, 1, 0];
 
 export class VoxelChunkMesh extends Mesh {
+  chunk: VoxelChunk;
+  geometry = new BufferGeometry();
+  material = new MeshStandardMaterial();
   constructor(chunk: VoxelChunk) {
-    const palette = chunk.world.palette;
+    super();
+    this.chunk = chunk;
+    this.update();
+  }
+
+  update() {
+    const palette = this.chunk.world.palette;
 
     const vertices: number[] = [];
     const colors: number[] = [];
@@ -46,7 +31,7 @@ export class VoxelChunkMesh extends Mesh {
       }
     }
 
-    const generator = voxelFaceGenerator(chunk);
+    const generator = voxelFaceGenerator(this.chunk);
 
     // Construct geometry
     let hasColors = false;
@@ -67,16 +52,12 @@ export class VoxelChunkMesh extends Mesh {
       if (faces & FACE.NZ) add(nz, x, y, z, r, g, b);
     }
 
-    const geometry = new BufferGeometry();
-    geometry.setAttribute("position", new BufferAttribute(new Uint8Array(vertices), 3));
-    geometry.computeVertexNormals();
+    this.geometry.setAttribute("position", new BufferAttribute(new Uint8Array(vertices), 3));
+    this.geometry.computeVertexNormals();
 
-    const material = new MeshStandardMaterial();
     if (hasColors) {
-      geometry.setAttribute("color", new Float32BufferAttribute(colors, 3));
-      material.vertexColors = true;
+      this.geometry.setAttribute("color", new Float32BufferAttribute(colors, 3));
+      this.material.vertexColors = true;
     }
-
-    super(geometry, material);
   }
 }

@@ -7,12 +7,11 @@ import { BulletTag, InSceneTag, LocalPlayerTag, PlayerCollisionTag, RemotePlayer
 import { RenderSystem } from "./systems/render";
 import { ControlsSystem } from "./systems/controls";
 import { StatsSystem } from "./systems/stats";
-import { VoxelWorldSystem } from "./systems/voxel-world";
 import { Object3DComponent } from "./components/object3D";
 import { PositionSyncSystem } from "./systems/position-sync";
 import { PlayerController } from "./systems/player-controller";
 import { ExtendedWorld } from "./utils/extended-world";
-import { VoxelWorldSyncSystem } from "./systems/voxel-world-sync";
+import { VoxelWorldSystem } from "./systems/voxel-world";
 import { RemotePlayerSystem } from "./systems/remote-players";
 import { RemotePlayerMovementSystem } from "./systems/remote-player-movement";
 
@@ -38,7 +37,6 @@ world
   .registerSystem(RemotePlayerMovementSystem)
   .registerSystem(PositionSyncSystem)
   .registerSystem(VoxelWorldSystem)
-  .registerSystem(VoxelWorldSyncSystem)
   .registerSystem(RenderSystem, { priority: 999 })
   .registerSystem(StatsSystem, { priority: 1000 });
 

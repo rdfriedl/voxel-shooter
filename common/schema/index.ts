@@ -20,7 +20,7 @@ export class Player extends Schema {
 }
 
 export class VoxelWorld extends Schema {
-  @type({ map: "string" }) chunks = new MapSchema<string>();
+  @type({ map: "string" }) chunks = new MapSchema<string, string>();
   @type(["number"]) palette = new ArraySchema<number>();
   @type(Vector) size = new Vector();
 }

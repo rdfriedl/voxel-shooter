@@ -1,6 +1,6 @@
 import { deflate, inflate } from "pako";
 import { Vector3 } from "three";
-import { vecToIndex } from "../utils/3d-array";
+import { vecToIndex } from "../utils/vector";
 import { VoxelWorld } from "./voxel-world";
 
 function bufferToString(buffer: ArrayBuffer) {
@@ -14,15 +14,17 @@ export class VoxelChunk {
   size: Vector3;
   data: Uint8Array;
   world: VoxelWorld;
+  position: Vector3;
 
   dirty: boolean = false;
 
-  constructor(size: number, world: VoxelWorld) {
+  constructor(size: number, world: VoxelWorld, position:Vector3) {
     this.size = new Vector3(size, size, size);
     if (size < 1) throw new Error("size must be greater than 1");
 
     this.world = world;
     this.data = new Uint8Array(size * size * size);
+    this.position = position.clone();
   }
 
   isOutOfBounds(vec: Vector3) {
