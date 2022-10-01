@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
-import Input from "@mui/joy/Input";
 import BoltIcon from "@mui/icons-material/Bolt";
 import Chip from "@mui/joy/Chip";
-import FormControl from "@mui/joy/FormControl";
 import Link from "@mui/joy/Link";
-import FormHelperText from "@mui/joy/FormHelperText";
+import Input from "@mui/joy/Input";
 import Button from "@mui/joy/Button";
+import FormControl from "@mui/joy/FormControl";
+import FormHelperText from "@mui/joy/FormHelperText";
 import { Stack } from "./Stack";
 
 export type LnAddressFormProps = {
@@ -13,7 +13,7 @@ export type LnAddressFormProps = {
 };
 
 export const LnAddressForm = ({ onSubmit }: LnAddressFormProps) => {
-  const [address, setAddress] = useState("");
+  const [address, setAddress] = useState(localStorage.getItem("address") ?? "");
   const [valid, setValid] = useState(false);
 
   const checkAddress = useCallback(
@@ -26,6 +26,7 @@ export const LnAddressForm = ({ onSubmit }: LnAddressFormProps) => {
 
       const res = await fetch(`https://${domain}/.well-known/lnurlp/${username}`);
       setValid(res.ok);
+      localStorage.setItem("address", lnAddress);
     },
     [setValid]
   );

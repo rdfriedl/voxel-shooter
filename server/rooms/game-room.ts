@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import { Client, Delayed, Room } from "colyseus";
 import { Vector3 } from "three";
-import { Player, State } from "../../common/schema";
+import { Player, State, UserLnInfo } from "../../common/schema";
 import { readVoxChunksIntoWorld, readVoxModelChunks } from "../../common/utils/vox-loader";
 import { VoxelWorld } from "../../common/voxel";
 import { BulletManager } from "../../common/bullets/core";
@@ -81,7 +81,8 @@ export class GameRoom extends Room<State> {
     }
   }
 
-  onAuth(client, options, req) {
+  onAuth(client: Client, { userLnInfo }: { userLnInfo: UserLnInfo }, req) {
+    client.userData = userLnInfo;
     return true;
   }
 

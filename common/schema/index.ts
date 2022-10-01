@@ -1,5 +1,10 @@
 import { ArraySchema, MapSchema, Schema, type } from "@colyseus/schema";
 
+export type UserLnInfo = {
+  address?: string;
+  webln: boolean;
+};
+
 export class Vector extends Schema {
   @type("number") x = 0;
   @type("number") y = 0;

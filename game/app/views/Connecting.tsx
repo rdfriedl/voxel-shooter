@@ -10,9 +10,9 @@ const Layout = styled.div`
   gap: 1rem;
 `;
 
-export const ConnectingView = () => (
+export const LoadingView = ({ title }: { title: string }) => (
   <Layout>
-    <h1>Connecting</h1>
+    <h1>{title}</h1>
     <CircularProgress variant="soft" size="lg" />
   </Layout>
 );

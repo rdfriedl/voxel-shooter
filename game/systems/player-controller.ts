@@ -49,6 +49,8 @@ export class PlayerController extends System {
         const standingOn = intersections[0];
 
         velocity.y -= 9.8 * 20 * delta;
+        velocity.z -= velocity.z * 8 * delta;
+        velocity.x -= velocity.x * 8 * delta;
 
         const moveForward = keyStates["KeyW"] ?? false;
         const moveBackward = keyStates["KeyS"] ?? false;
@@ -60,11 +62,18 @@ export class PlayerController extends System {
         direction.x = Number(moveLeft) - Number(moveRight);
         direction.normalize();
 
-        if (moveForward || moveBackward) velocity.z = direction.z * 40 * delta;
-        else velocity.z -= velocity.z * 8 * delta;
+        const camera = controls.getObject();
+        velocity.z = 0;
+        velocity.x = 0;
+        // move right/left
+        const v = new Vector3();
+        v.setFromMatrixColumn(camera.matrix, 0);
+        velocity.addScaledVector(v, -direction.x * 20);
 
-        if (moveLeft || moveRight) velocity.x = direction.x * 20 * delta;
-        else velocity.x -= velocity.x * 8 * delta;
+        // move forward/backwards
+        v.setFromMatrixColumn(camera.matrix, 0);
+        v.crossVectors(camera.up, v);
+        velocity.addScaledVector(v, -direction.z * 40);
 
         if (this.canJump && jump) {
           velocity.y = 50;
@@ -75,18 +84,7 @@ export class PlayerController extends System {
           this.canJump = true;
         }
 
-        const camera = controls.getObject();
-        // move right/left
-        const v = new Vector3();
-        v.setFromMatrixColumn(camera.matrix, 0);
-        position.addScaledVector(v, -velocity.x);
-
-        // move forward/backwards
-        v.setFromMatrixColumn(camera.matrix, 0);
-        v.crossVectors(camera.up, v);
-        position.addScaledVector(v, -velocity.z);
-
-        position.y += velocity.y * delta;
+        position.addScaledVector(velocity, delta);
 
         if (position.y < -100) {
           velocity.y = 0;
@@ -102,7 +100,7 @@ export class PlayerController extends System {
           this.canShoot = false;
           setTimeout(() => {
             this.canShoot = true;
-          }, 50);
+          }, 150);
         }
       }
     });
