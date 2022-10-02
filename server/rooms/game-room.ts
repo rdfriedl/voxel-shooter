@@ -5,7 +5,7 @@ import { Vector3 } from "three";
 import { Player, State, UserLnInfo } from "../../common/schema";
 import { readVoxChunksIntoWorld, readVoxModelChunks } from "../../common/utils/vox-loader";
 import { VoxelWorld } from "../../common/voxel";
-import { BulletManager } from "../../common/bullets/core";
+import { BulletManager } from "../../common/bullets/manager";
 
 export class GameRoom extends Room<State> {
   // number of clients per room
@@ -59,9 +59,10 @@ export class GameRoom extends Room<State> {
     const player = this.state.players.get(client.sessionId);
     if (!player) return;
 
-    const p = new Vector3().fromArray(message.position);
-    const d = new Vector3().fromArray(message.direction);
-    this.bulletManager.createBullet(p, d);
+    const position = new Vector3().fromArray(message.position);
+    const direction = new Vector3().fromArray(message.direction).multiplyScalar(1000);
+
+    this.bulletManager.createBullet(position, direction);
 
     // for (const other of this.clients) {
     // other.send("new-bullet", message);
@@ -69,8 +70,9 @@ export class GameRoom extends Room<State> {
   }
 
   execute() {
+    const delta = this.clock.deltaTime / 1000;
     // update bullets
-    this.bulletManager.update(this.clock.deltaTime);
+    this.bulletManager.update(delta);
 
     // update chunks
     for (const [key, chunk] of this.voxelWorld) {

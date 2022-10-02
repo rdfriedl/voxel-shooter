@@ -15,6 +15,8 @@ export class VoxelChunkMesh extends Mesh {
   constructor(chunk: VoxelChunk) {
     super();
     this.chunk = chunk;
+    this.receiveShadow = true;
+    this.castShadow = true;
     this.update();
   }
 
@@ -52,6 +54,7 @@ export class VoxelChunkMesh extends Mesh {
       if (faces & FACE.NZ) add(nz, x, y, z, r, g, b);
     }
 
+    this.geometry = new BufferGeometry();
     this.geometry.setAttribute("position", new BufferAttribute(new Uint8Array(vertices), 3));
     this.geometry.computeVertexNormals();
 

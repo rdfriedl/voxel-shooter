@@ -2,7 +2,7 @@ import { Group, Mesh, MeshBasicMaterial, SphereGeometry, Vector3 } from "three";
 import { Line2 } from "three/examples/jsm/lines/Line2";
 import { LineGeometry } from "three/examples/jsm/lines/LineGeometry";
 import { LineMaterial } from "three/examples/jsm/lines/LineMaterial";
-import { Bullet, BulletManager } from "../../common/bullets/core";
+import { Bullet, BulletManager } from "../../common/bullets";
 
 class BulletObject extends Mesh {
   bullet: Bullet;

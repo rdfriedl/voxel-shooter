@@ -57,6 +57,7 @@ export class PlayerController extends System {
         const moveLeft = keyStates["KeyA"] ?? false;
         const moveRight = keyStates["KeyD"] ?? false;
         const jump = keyStates["Space"] ?? false;
+        const sprint = keyStates["ShiftLeft"] ?? false;
 
         direction.z = Number(moveBackward) - Number(moveForward);
         direction.x = Number(moveLeft) - Number(moveRight);
@@ -68,12 +69,12 @@ export class PlayerController extends System {
         // move right/left
         const v = new Vector3();
         v.setFromMatrixColumn(camera.matrix, 0);
-        velocity.addScaledVector(v, -direction.x * 20);
+        velocity.addScaledVector(v, -direction.x * (sprint ? 30 : 20));
 
         // move forward/backwards
         v.setFromMatrixColumn(camera.matrix, 0);
         v.crossVectors(camera.up, v);
-        velocity.addScaledVector(v, -direction.z * 40);
+        velocity.addScaledVector(v, -direction.z * (sprint ? 50 : 40));
 
         if (this.canJump && jump) {
           velocity.y = 50;
