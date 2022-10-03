@@ -2,7 +2,6 @@ import { Vector3 } from "three";
 import { Signal } from "../utils/emitter";
 import { VoxelWorld } from "../voxel";
 import { Bullet } from "./bullet";
-import { PunctureBullet } from "./types/puncture";
 
 export class BulletManager {
   bullets: Bullet[] = [];
@@ -17,7 +16,7 @@ export class BulletManager {
   }
 
   createBullet(position: Vector3, velocity: Vector3) {
-    const bullet = new PunctureBullet(position, velocity, this);
+    const bullet = new Bullet(position, velocity, this);
     this.bullets.push(bullet);
     this.onBulletCreate.emit(bullet);
   }

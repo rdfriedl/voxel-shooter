@@ -68,7 +68,7 @@ export class VoxelWorldSystem extends System {
 
   createChunkEntity(chunk: VoxelChunk) {
     const key = vecToString(chunk.position);
-    const name = `Chunk-${key}`;
+    const name = `chunk-${key}`;
     const mesh = new VoxelChunkMesh(chunk);
     mesh.name = name;
     const entity = this.world

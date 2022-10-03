@@ -101,7 +101,7 @@ export class PlayerController extends System {
           this.canShoot = false;
           setTimeout(() => {
             this.canShoot = true;
-          }, 150);
+          }, 120);
         }
       }
     });

@@ -1,4 +1,5 @@
-import { Clock, DirectionalLight, HemisphereLight, Vector3 } from "three";
+import { Clock, DirectionalLight, HemisphereLight, MathUtils, Vector3 } from "three";
+import { Sky } from "three/examples/jsm/objects/Sky";
 
 import { SceneSystem } from "./systems/scene";
 import { Movement } from "./components/movement";
@@ -49,6 +50,20 @@ export class Game {
       .addComponent(Movement, { position: new Vector3(200, 20, 200) })
       .addComponent(Object3DComponent, { object: this.world.getSystem(ControlsSystem).controls.getObject() })
       .addComponent(LocalPlayerTag);
+
+    // sky
+    const sky = new Sky();
+    sky.scale.setScalar(40000);
+    this.world.createEntity("sky").addComponent(Object3DComponent, { object: sky });
+
+    sky.material.uniforms.turbidity.value = 10;
+    sky.material.uniforms.rayleigh.value = 3;
+    sky.material.uniforms.mieCoefficient.value = 0.005;
+    sky.material.uniforms.mieDirectionalG.value = 0.7;
+    const phi = MathUtils.degToRad(90 - 2);
+    const theta = MathUtils.degToRad(180);
+    sky.material.uniforms.sunPosition.value.setFromSphericalCoords(1, phi, theta);
+    // sky.material.uniforms.exposure.value = 0.5;
 
     // NOTE: move this out to another system
     const scene = this.world.getSystem(SceneSystem).scene;

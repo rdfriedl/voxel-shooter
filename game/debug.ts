@@ -13,7 +13,7 @@ export function setup(world: ExtendedWorld) {
   const getCamera = () => world.getSystem(SceneSystem).camera;
 
   // @ts-ignore
-  window.debug = {
+  window.dev = {
     world,
     get scene() {
       return getScene();
@@ -26,6 +26,12 @@ export function setup(world: ExtendedWorld) {
     },
     get schema() {
       return getRoom()?.state;
+    },
+    get entities() {
+      return world.getEntities();
+    },
+    get nonChunkEntities() {
+      return world.getEntities().filter((e) => !e.name.includes("chunk"));
     },
     get voxelWorld() {
       return world.getSystem(VoxelWorldSystem).voxelWorld;
