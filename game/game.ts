@@ -12,7 +12,8 @@ import { PlayerController } from "./systems/player-controller";
 import { ExtendedWorld } from "./utils/extended-world";
 import { VoxelWorldSystem } from "./systems/voxel-world";
 import { RemotePlayerSystem } from "./systems/remote-players";
-import { RemotePlayerMovementSystem } from "./systems/remote-player-movement";
+import { MovementSystem } from "./systems/movement";
+import { BulletSystem } from "./systems/bullet-system";
 
 export class Game {
   world = new ExtendedWorld();
@@ -36,7 +37,8 @@ export class Game {
       .registerSystem(ControlsSystem)
       .registerSystem(PlayerController)
       .registerSystem(RemotePlayerSystem)
-      .registerSystem(RemotePlayerMovementSystem)
+      .registerSystem(BulletSystem)
+      .registerSystem(MovementSystem)
       .registerSystem(PositionSyncSystem)
       .registerSystem(VoxelWorldSystem)
       .registerSystem(RenderSystem, { priority: 999 })

@@ -3,8 +3,10 @@ import { intersectRay } from "../voxel/raytrace";
 import { BulletManager } from "./manager";
 
 export class Bullet {
+  static lastId = 0;
   static vec1 = new Vector3();
 
+  id: number;
   position: Vector3 = new Vector3();
   velocity: Vector3 = new Vector3();
   manager: BulletManager;
@@ -12,6 +14,7 @@ export class Bullet {
     this.position.copy(start);
     this.velocity.copy(velocity);
     this.manager = manager;
+    this.id = Bullet.lastId++;
   }
 
   update(dt: number) {

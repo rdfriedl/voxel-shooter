@@ -1,8 +1,8 @@
-import { System } from "ecsy";
+import { System, Not } from "ecsy";
 import { Movement } from "../components/movement";
-import { RemotePlayerTag } from "../components/tags";
+import { LocalPlayerTag } from "../components/tags";
 
-export class RemotePlayerMovementSystem extends System {
+export class MovementSystem extends System {
   execute(delta: number) {
     this.queries.remotePlayers.results.forEach((entity) => {
       const movement = entity.getMutableComponent(Movement);
@@ -12,8 +12,8 @@ export class RemotePlayerMovementSystem extends System {
     });
   }
 }
-RemotePlayerMovementSystem.queries = {
+MovementSystem.queries = {
   remotePlayers: {
-    components: [RemotePlayerTag, Movement],
+    components: [Movement, Not(LocalPlayerTag)],
   },
 };

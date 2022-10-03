@@ -37,6 +37,17 @@ export class GameRoom extends Room<State> {
 
     this.onMessage("shoot", this.handleShoot.bind(this));
 
+    this.bulletManager.onBulletCreate.addListener((bullet) => {
+      this.broadcast("bullet-create", {
+        id: bullet.id,
+        position: bullet.position.toArray(),
+        velocity: bullet.velocity.toArray(),
+      });
+    });
+    this.bulletManager.onBulletDestroy.addListener((bullet) => {
+      this.broadcast("bullet-destroy", bullet.id);
+    });
+
     this.timer = this.clock.setInterval(this.execute.bind(this), 1000 / 60);
 
     this.loadLevel();
