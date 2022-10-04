@@ -1,11 +1,12 @@
 import fs from "fs";
 import path from "path";
-import { Client, Delayed, Room } from "colyseus";
+import { Client, Delayed, Presence, Room } from "colyseus";
 import { Vector3 } from "three";
-import { Player, State, UserLnInfo } from "../../common/schema";
+import { PlayerState, State, UserLnInfo } from "../../common/schema";
 import { readVoxChunksIntoWorld, readVoxModelChunks } from "../../common/utils/vox-loader";
 import { VoxelWorld } from "../../common/voxel";
-import { BulletManager } from "../../common/bullets/manager";
+import { BulletManager } from "../game/bullets/manager";
+import { PlayerManager } from "../game/players/manager";
 
 export class GameRoom extends Room<State> {
   // number of clients per room
@@ -13,7 +14,15 @@ export class GameRoom extends Room<State> {
 
   timer: Delayed | undefined;
   voxelWorld: VoxelWorld = new VoxelWorld(16, new Vector3(32, 32, 32));
-  bulletManager: BulletManager = new BulletManager(this.voxelWorld);
+  bulletManager: BulletManager;
+  playerManager: PlayerManager;
+
+  constructor(presence?: Presence) {
+    super(presence);
+
+    this.bulletManager = new BulletManager(this);
+    this.playerManager = new PlayerManager(this);
+  }
 
   // room has been created: bring your own logic
   async onCreate(options) {
@@ -22,14 +31,9 @@ export class GameRoom extends Room<State> {
     this.setState(new State());
 
     this.onMessage("position", (client, message) => {
-      const player = this.state.players.get(client.sessionId);
+      const player = this.playerManager.getPlayer(client.sessionId);
       if (player) {
-        player.position.px = message.position.x;
-        player.position.py = message.position.y;
-        player.position.pz = message.position.z;
-        player.position.vx = message.velocity.x;
-        player.position.vy = message.velocity.y;
-        player.position.vz = message.velocity.z;
+        player.setPosition(message.position, message.velocity);
       } else {
         console.log("missing player for " + client.sessionId);
       }
@@ -69,22 +73,19 @@ export class GameRoom extends Room<State> {
   }
 
   handleShoot(client: Client, message: { position: number[]; direction: number[] }) {
-    const player = this.state.players.get(client.sessionId);
+    const player = this.playerManager.getPlayer(client.sessionId);
     if (!player) return;
 
     const position = new Vector3().fromArray(message.position);
     const direction = new Vector3().fromArray(message.direction).multiplyScalar(1000);
 
-    this.bulletManager.createBullet(position, direction);
-
-    // for (const other of this.clients) {
-    // other.send("new-bullet", message);
-    // }
+    this.bulletManager.createBullet(position, direction, player);
   }
 
   execute() {
     const delta = this.clock.deltaTime / 1000;
     // update bullets
+    this.playerManager.update(delta);
     this.bulletManager.update(delta);
 
     // update chunks
@@ -102,10 +103,12 @@ export class GameRoom extends Room<State> {
   }
 
   async onJoin(client: Client) {
-    console.log("creating player for", client.sessionId);
-    const player = new Player();
-    player.id = client.sessionId;
-    this.state.players.set(client.sessionId, player);
+    // create player state
+    const state = new PlayerState();
+    state.id = client.sessionId;
+    this.state.players.set(client.sessionId, state);
+    // create player
+    this.playerManager.createPlayer(state);
 
     client.send("hello", `hello ${client.sessionId}`);
   }
@@ -113,6 +116,7 @@ export class GameRoom extends Room<State> {
   async onLeave(client: Client) {
     console.log(`player ${client.sessionId} left`);
     this.state.players.delete(client.sessionId);
+    this.playerManager.removePlayer(client.sessionId);
   }
 
   async onDispose() {

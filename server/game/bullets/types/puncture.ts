@@ -1,4 +1,4 @@
-import { intersectRay } from "../../voxel/raytrace";
+import { intersectRay } from "../../../../common/voxel/raytrace";
 import { Bullet } from "../bullet";
 
 export class PunctureBullet extends Bullet {
@@ -14,12 +14,16 @@ export class PunctureBullet extends Bullet {
         this.power--;
       } else break;
     }
+    if (this.power <= 0) {
+      this.alive = false;
+      return;
+    }
 
     if (this.manager.world.isVoxelOutOfBounds(this.position)) {
-      return false;
+      this.alive = false;
+      return;
     }
 
     this.position.copy(next);
-    return true;
   }
 }

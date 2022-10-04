@@ -1,6 +1,6 @@
 import { Entity, System } from "ecsy";
 import { CapsuleGeometry, Group, Mesh, MeshBasicMaterial } from "three";
-import { Player } from "../../common/schema";
+import { PlayerState } from "../../common/schema";
 import { Movement } from "../components/movement";
 import { Object3DComponent } from "../components/object3D";
 import { RemotePlayerTag } from "../components/tags";
@@ -9,8 +9,9 @@ import { getRoom, onPlayerJoin, onPlayerLeave, onPlayerPositionChange } from "..
 export class RemotePlayerSystem extends System {
   playerEntities: Map<string, Entity> = new Map();
 
-  createPlayerEntity(player: Player) {
+  createPlayerEntity(player: PlayerState) {
     const group = new Group();
+    group.name = `player-${player.id}`;
     const mesh = new Mesh(
       new CapsuleGeometry(2, 8),
       new MeshBasicMaterial({
@@ -45,8 +46,8 @@ export class RemotePlayerSystem extends System {
       const entity = this.playerEntities.get(player.id);
       if (!entity) return;
       const movement = entity.getMutableComponent(Movement);
-      movement?.position.set(player.position.px, player.position.py, player.position.pz);
-      movement?.velocity.set(player.position.vx, player.position.vy, player.position.vz);
+      movement?.position.copy(player.position.getPositionVector());
+      movement?.velocity.copy(player.position.getVelocityVector());
     });
 
     // create players
@@ -55,8 +56,8 @@ export class RemotePlayerSystem extends System {
       let entity = this.playerEntities.get(player.id);
       if (!entity) entity = this.createPlayerEntity(player);
       const movement = entity.getMutableComponent(Movement);
-      movement?.position.set(player.position.px, player.position.py, player.position.pz);
-      movement?.velocity.set(player.position.vx, player.position.vy, player.position.vz);
+      movement?.position.copy(player.position.getPositionVector());
+      movement?.velocity.copy(player.position.getVelocityVector());
     });
   }
   execute() {}

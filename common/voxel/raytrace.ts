@@ -1,9 +1,15 @@
 import { Vector3 } from "three";
 import { VoxelWorld } from "./voxel-world";
 
+export type VoxelIntersection = {
+  point: Vector3;
+  normal: Vector3;
+  voxel: Vector3;
+};
+
 // from: https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.42.3443&rep=rep1&type=pdf
 const _vector = new Vector3();
-export function intersectRay(start: Vector3, end: Vector3, world: VoxelWorld) {
+export function intersectRay(start: Vector3, end: Vector3, world: VoxelWorld): VoxelIntersection | null {
   let dx = end.x - start.x;
   let dy = end.y - start.y;
   let dz = end.z - start.z;
