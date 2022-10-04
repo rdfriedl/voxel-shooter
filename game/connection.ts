@@ -10,6 +10,7 @@ export const client = new Client(
 export const onFirstState = new Signal<[State]>();
 export const onJoin = new Signal<[Room<State>]>();
 export const onLeave = new Signal<[number]>();
+export const onTimeChange = new Signal<[number]>();
 
 export const onPlayerJoin = new Signal<[PlayerState]>();
 export const onPlayerLeave = new Signal<[PlayerState]>();
@@ -58,6 +59,13 @@ export async function connect(userLnInfo: UserLnInfo) {
     room.state.players.onRemove = (player) => {
       if (player.id === room?.sessionId) return;
       onPlayerLeave.emit(player);
+    };
+    room.state.onChange = (changes) => {
+      for (const change of changes) {
+        if (change.field === "time") {
+          onTimeChange.emit(change.value);
+        }
+      }
     };
 
     onJoin.emit(room);

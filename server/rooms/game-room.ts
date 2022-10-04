@@ -12,7 +12,8 @@ export class GameRoom extends Room<State> {
   // number of clients per room
   maxClients = 20;
 
-  timer: Delayed | undefined;
+  executeTimer: Delayed | undefined;
+  incrementTime: Delayed | undefined;
   voxelWorld: VoxelWorld = new VoxelWorld(16, new Vector3(32, 32, 32));
   bulletManager: BulletManager;
   playerManager: PlayerManager;
@@ -52,7 +53,8 @@ export class GameRoom extends Room<State> {
       this.broadcast("bullet-destroy", bullet.id);
     });
 
-    this.timer = this.clock.setInterval(this.execute.bind(this), 1000 / 60);
+    this.executeTimer = this.clock.setInterval(this.execute.bind(this), 1000 / 60);
+    this.incrementTime = this.clock.setInterval(() => (this.state.time += 1), 1000);
 
     this.loadLevel();
   }
@@ -120,6 +122,7 @@ export class GameRoom extends Room<State> {
   }
 
   async onDispose() {
-    this.timer?.clear();
+    this.executeTimer?.clear();
+    this.incrementTime?.clear();
   }
 }

@@ -48,6 +48,7 @@ export class VoxelWorldState extends Schema {
 }
 
 export class State extends Schema {
+  @type("number") time = 0;
   @type({ map: PlayerState }) players = new MapSchema<PlayerState>();
   @type(VoxelWorldState) world = new VoxelWorldState();
 }

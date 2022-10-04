@@ -15,10 +15,14 @@ import { VoxelWorldSystem } from "./systems/voxel-world";
 import { RemotePlayerSystem } from "./systems/remote-players";
 import { MovementSystem } from "./systems/movement";
 import { BulletSystem } from "./systems/bullet-system";
+import { onTimeChange } from "./connection";
 
 export class Game {
   world = new ExtendedWorld();
   clock = new Clock();
+
+  time: number = 0;
+  sky: Sky;
 
   constructor() {
     // components
@@ -52,7 +56,7 @@ export class Game {
       .addComponent(LocalPlayerTag);
 
     // sky
-    const sky = new Sky();
+    const sky = (this.sky = new Sky());
     sky.scale.setScalar(40000);
     this.world.createEntity("sky").addComponent(Object3DComponent, { object: sky });
 
@@ -60,9 +64,11 @@ export class Game {
     sky.material.uniforms.rayleigh.value = 3;
     sky.material.uniforms.mieCoefficient.value = 0.005;
     sky.material.uniforms.mieDirectionalG.value = 0.7;
-    const phi = MathUtils.degToRad(90 - 2);
-    const theta = MathUtils.degToRad(180);
-    sky.material.uniforms.sunPosition.value.setFromSphericalCoords(1, phi, theta);
+
+    // keep time in sync
+    onTimeChange.addListener((time) => {
+      this.time = time;
+    });
 
     // NOTE: move this out to another system
     const scene = this.world.getSystem(SceneSystem).scene;
@@ -75,9 +81,9 @@ export class Game {
     dirLight.position.set(1.5, 3, 2.5);
     scene.add(dirLight);
 
-    const dirLight2 = new DirectionalLight(0xffffff, 0.5);
-    dirLight2.position.set(-1.5, -3, -2.5);
-    scene.add(dirLight2);
+    // const dirLight2 = new DirectionalLight(0xffffff, 0.5);
+    // dirLight2.position.set(-1.5, -3, -2.5);
+    // scene.add(dirLight2);
 
     if (import.meta.env.DEV) {
       import("./debug").then((m) => m.setup(this.world));
@@ -88,10 +94,18 @@ export class Game {
     const delta = this.clock.getDelta();
     this.world.execute(delta, now);
 
+    this.time += delta;
+    this.setSun();
+
     if (this.world.enabled) {
       requestAnimationFrame(this.animate);
     }
   };
+  setSun() {
+    const phi = MathUtils.degToRad(this.time % 360);
+    const theta = Math.PI; //MathUtils.degToRad(180);
+    this.sky.material.uniforms.sunPosition.value.setFromSphericalCoords(1, phi, theta);
+  }
   stop() {
     this.world.stop();
   }
