@@ -1,6 +1,6 @@
 import { Client, Room } from "colyseus.js";
 import { Vector3 } from "three";
-import { State, UserLnInfo } from "../common/schema";
+import { Player, State, UserLnInfo } from "../common/schema";
 import { Signal } from "../common/utils/emitter";
 
 export const client = new Client(
@@ -10,6 +10,10 @@ export const client = new Client(
 export const onFirstState = new Signal<[State]>();
 export const onJoin = new Signal<[Room<State>]>();
 export const onLeave = new Signal<[number]>();
+
+export const onPlayerJoin = new Signal<[Player]>();
+export const onPlayerLeave = new Signal<[Player]>();
+export const onPlayerPositionChange = new Signal<[Player]>();
 
 export const onBulletCreate = new Signal<[number, Vector3, Vector3]>();
 export const onBulletChange = new Signal<[number, Vector3, Vector3]>();
@@ -41,6 +45,17 @@ export async function connect(userLnInfo: UserLnInfo) {
       const velocity = new Vector3().fromArray(message.velocity);
       onBulletCreate.emit(id, position, velocity);
     });
+
+    room.state.players.onAdd = (player) => {
+      if (player.id === room?.sessionId) return;
+      onPlayerJoin.emit(player);
+
+      player.position.onChange = (position) => onPlayerPositionChange.emit(player);
+    };
+    room.state.players.onRemove = (player) => {
+      if (player.id === room?.sessionId) return;
+      onPlayerLeave.emit(player);
+    };
 
     onJoin.emit(room);
     return room;

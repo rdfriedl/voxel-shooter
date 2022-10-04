@@ -63,7 +63,6 @@ export class Game {
     const phi = MathUtils.degToRad(90 - 2);
     const theta = MathUtils.degToRad(180);
     sky.material.uniforms.sunPosition.value.setFromSphericalCoords(1, phi, theta);
-    // sky.material.uniforms.exposure.value = 0.5;
 
     // NOTE: move this out to another system
     const scene = this.world.getSystem(SceneSystem).scene;

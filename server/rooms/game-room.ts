@@ -24,12 +24,12 @@ export class GameRoom extends Room<State> {
     this.onMessage("position", (client, message) => {
       const player = this.state.players.get(client.sessionId);
       if (player) {
-        player.position.x = message.position.x;
-        player.position.y = message.position.y;
-        player.position.z = message.position.z;
-        player.velocity.x = message.velocity.x;
-        player.velocity.y = message.velocity.y;
-        player.velocity.z = message.velocity.z;
+        player.position.px = message.position.x;
+        player.position.py = message.position.y;
+        player.position.pz = message.position.z;
+        player.position.vx = message.velocity.x;
+        player.position.vy = message.velocity.y;
+        player.position.vz = message.velocity.z;
       } else {
         console.log("missing player for " + client.sessionId);
       }
@@ -61,7 +61,9 @@ export class GameRoom extends Room<State> {
       typedArray[i] = voxFile[i];
     }
     const chunks = readVoxModelChunks(array);
-    this.state.world.size.copy(this.voxelWorld.size);
+    this.state.world.size.x = this.voxelWorld.size.x;
+    this.state.world.size.y = this.voxelWorld.size.y;
+    this.state.world.size.z = this.voxelWorld.size.z;
     readVoxChunksIntoWorld(chunks, this.voxelWorld);
     this.voxelWorld.palette.forEach((c, i) => (this.state.world.palette[i] = c));
   }

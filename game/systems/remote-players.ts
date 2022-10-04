@@ -4,7 +4,7 @@ import { Player } from "../../common/schema";
 import { Movement } from "../components/movement";
 import { Object3DComponent } from "../components/object3D";
 import { RemotePlayerTag } from "../components/tags";
-import { getRoom } from "../connection";
+import { getRoom, onPlayerJoin, onPlayerLeave, onPlayerPositionChange } from "../connection";
 
 export class RemotePlayerSystem extends System {
   playerEntities: Map<string, Entity> = new Map();
@@ -32,33 +32,32 @@ export class RemotePlayerSystem extends System {
     const room = getRoom();
     if (!room) return;
 
-    room.state.players.onAdd = (player) => {
-      if (player.id === room.sessionId) return;
+    onPlayerJoin.addListener((player) => {
       if (!this.playerEntities.has(player.id)) {
         this.createPlayerEntity(player);
       }
-    };
-    room.state.players.onRemove = (player) => {
+    });
+    onPlayerLeave.addListener((player) => {
       const entity = this.playerEntities.get(player.id);
       if (entity) entity.remove();
-    };
-  }
-  execute() {
-    const room = getRoom();
-    if (!room) return;
+    });
+    onPlayerPositionChange.addListener((player) => {
+      const entity = this.playerEntities.get(player.id);
+      if (!entity) return;
+      const movement = entity.getMutableComponent(Movement);
+      movement?.position.set(player.position.px, player.position.py, player.position.pz);
+      movement?.velocity.set(player.position.vx, player.position.vy, player.position.vz);
+    });
 
+    // create players
     room.state.players.forEach((player) => {
       if (player.id === room.sessionId) return;
       let entity = this.playerEntities.get(player.id);
-      if (!entity) {
-        entity = this.createPlayerEntity(player);
-      }
-
+      if (!entity) entity = this.createPlayerEntity(player);
       const movement = entity.getMutableComponent(Movement);
-      // @ts-ignore
-      movement?.position.copy(player.position);
-      // @ts-ignore
-      movement?.velocity.copy(player.velocity);
+      movement?.position.set(player.position.px, player.position.py, player.position.pz);
+      movement?.velocity.set(player.position.vx, player.position.vy, player.position.vz);
     });
   }
+  execute() {}
 }

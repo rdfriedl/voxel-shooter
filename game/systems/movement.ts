@@ -4,7 +4,7 @@ import { LocalPlayerTag } from "../components/tags";
 
 export class MovementSystem extends System {
   execute(delta: number) {
-    this.queries.remotePlayers.results.forEach((entity) => {
+    this.queries.movable.results.forEach((entity) => {
       const movement = entity.getMutableComponent(Movement);
       if (!movement) return;
 
@@ -13,7 +13,7 @@ export class MovementSystem extends System {
   }
 }
 MovementSystem.queries = {
-  remotePlayers: {
+  movable: {
     components: [Movement, Not(LocalPlayerTag)],
   },
 };

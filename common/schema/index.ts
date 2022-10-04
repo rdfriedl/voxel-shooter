@@ -9,19 +9,21 @@ export class Vector extends Schema {
   @type("number") x = 0;
   @type("number") y = 0;
   @type("number") z = 0;
+}
 
-  copy(vector: { x: number; y: number; z: number }) {
-    this.x = vector.x;
-    this.y = vector.y;
-    this.z = vector.z;
-  }
+export class Position extends Schema {
+  @type("number") px = 0;
+  @type("number") py = 0;
+  @type("number") pz = 0;
+  @type("number") vx = 0;
+  @type("number") vy = 0;
+  @type("number") vz = 0;
 }
 
 export class Player extends Schema {
   @type("string") id = "";
   @type("number") health = 100;
-  @type(Vector) position = new Vector();
-  @type(Vector) velocity = new Vector();
+  @type(Position) position = new Position();
 }
 
 export class VoxelWorld extends Schema {
