@@ -1,6 +1,6 @@
-import { useEffect, useRef } from "react";
-import { getSystemErrorName } from "util";
+import { useEffect } from "react";
 import { Game } from "../../game";
+import { GameUI } from "../components/GameUI";
 
 export const GameView = () => {
   useEffect(() => {
@@ -13,5 +13,10 @@ export const GameView = () => {
     return () => game.stop();
   }, []);
 
-  return <div id="game" />;
+  return (
+    <>
+      <GameUI />
+      <div id="game" />
+    </>
+  );
 };

@@ -25,12 +25,8 @@ export async function connect(userLnInfo: UserLnInfo) {
   try {
     room = await client.joinOrCreate("game-room", { userLnInfo }, State);
 
-    let firstState = false;
-    room.onStateChange(() => {
-      if (!firstState && room) {
-        onFirstState.emit(room.state);
-        firstState = true;
-      }
+    room.onStateChange.once(() => {
+      if (room) onFirstState.emit(room.state);
     });
 
     room.onLeave((code) => {
