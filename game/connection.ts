@@ -52,8 +52,6 @@ export async function connect(userLnInfo: UserLnInfo) {
         for (const change of changes) {
           switch (change.field) {
             case "health":
-              console.log(`player ${player.id} health changed to ${change.value}`);
-
               return onPlayerHealthChange.emit(player.id, change.value);
           }
         }
