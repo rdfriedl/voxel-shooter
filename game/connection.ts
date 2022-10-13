@@ -14,6 +14,7 @@ export const onTimeChange = new Signal<[number]>();
 
 export const onPlayerJoin = new Signal<[PlayerState]>();
 export const onPlayerLeave = new Signal<[PlayerState]>();
+export const onPlayerHealthChange = new Signal<[string, number]>();
 export const onPlayerPositionChange = new Signal<[PlayerState]>();
 
 export const onBulletCreate = new Signal<[number, Vector3, Vector3]>();
@@ -47,10 +48,23 @@ export async function connect(userLnInfo: UserLnInfo) {
     });
 
     room.state.players.onAdd = (player) => {
-      if (player.id === room?.sessionId) return;
-      onPlayerJoin.emit(player);
+      player.onChange = (changes) => {
+        for (const change of changes) {
+          switch (change.field) {
+            case "health":
+              console.log(`player ${player.id} health changed to ${change.value}`);
+
+              return onPlayerHealthChange.emit(player.id, change.value);
+          }
+        }
+      };
 
       player.position.onChange = (position) => onPlayerPositionChange.emit(player);
+
+      // fire player join signal
+      if (player.id !== room?.sessionId) {
+        onPlayerJoin.emit(player);
+      }
     };
     room.state.players.onRemove = (player) => {
       if (player.id === room?.sessionId) return;

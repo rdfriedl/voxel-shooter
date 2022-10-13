@@ -18,6 +18,9 @@ export function setup(world: ExtendedWorld) {
     get scene() {
       return getScene();
     },
+    get state() {
+      return getRoom()?.state;
+    },
     get camera() {
       return getCamera();
     },

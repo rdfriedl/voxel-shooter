@@ -1,5 +1,7 @@
 import styled from "@emotion/styled";
-import { useRoomState } from "../../hooks/use-room-state";
+import { getRoom, onPlayerJoin, onPlayerLeave } from "../../../connection";
+import { useForceUpdate } from "../../hooks/use-force-update";
+import { useSignal } from "../../hooks/use-signal";
 
 const Layout = styled.div`
   display: flex;
@@ -13,11 +15,16 @@ const PlayerCount = styled.span`
 `;
 
 export const Header = () => {
-  const state = useRoomState();
+  const update = useForceUpdate();
+
+  useSignal(onPlayerJoin, update);
+  useSignal(onPlayerLeave, update);
+
+  const room = getRoom();
 
   return (
     <Layout>
-      <PlayerCount>{state?.players.size}</PlayerCount>
+      <PlayerCount>{room?.state?.players.size}</PlayerCount>
     </Layout>
   );
 };

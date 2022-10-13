@@ -6,6 +6,7 @@ import { Header } from "./UI/Header";
 import { Scoreboard } from "./UI/Scoreboard";
 
 import crosshairUrl from "../assets/crosshair.svg";
+import { HealthBar } from "./UI/HealthBar";
 
 const Layout = styled.div`
   position: fixed;
@@ -32,6 +33,12 @@ const Empty = styled.div`
   flex: 1;
   pointer-events: none;
 `;
+const BottomBar = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+`;
 const ScoreboardContainer = styled.div`
   position: fixed;
   top: 0;
@@ -53,6 +60,10 @@ export const GameUI = () => {
       <Layout>
         <StyledHeader />
         <Empty />
+        <BottomBar>
+          <HealthBar />
+          <Empty />
+        </BottomBar>
       </Layout>
       <Crosshair src={crosshairUrl} />
       {keyStates["Tab"] && (

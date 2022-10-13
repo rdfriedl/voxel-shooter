@@ -43,6 +43,8 @@ export class RemotePlayerSystem extends System {
       if (entity) entity.remove();
     });
     onPlayerPositionChange.addListener((player) => {
+      if (player.id === room.sessionId) return;
+
       const entity = this.playerEntities.get(player.id);
       if (!entity) return;
       const movement = entity.getMutableComponent(Movement);
