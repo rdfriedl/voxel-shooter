@@ -38,6 +38,7 @@ export class PositionState extends Schema {
 export class PlayerState extends Schema {
   @type("string") id = "";
   @type("number") health = 100;
+  @type("boolean") alive = false;
   @type(PositionState) position = new PositionState();
 }
 

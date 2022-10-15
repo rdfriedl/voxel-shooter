@@ -1,12 +1,12 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Game } from "../../game";
-import { GameUI } from "../components/GameUI";
+import { GameUI } from "../gameUI/GameUI";
 
 export const GameView = () => {
+  const [game] = useState(() => new Game());
+
   useEffect(() => {
     const container = document.getElementById("game");
-    const game = new Game();
-
     container?.appendChild(game.domElement);
     game.play();
 
@@ -15,7 +15,7 @@ export const GameView = () => {
 
   return (
     <>
-      <GameUI />
+      <GameUI game={game} />
       <div id="game" />
     </>
   );

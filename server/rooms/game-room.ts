@@ -30,15 +30,7 @@ export class GameRoom extends Room<State> {
     console.log("Room created!", options);
 
     this.setState(new State());
-
-    this.onMessage("position", (client, message) => {
-      const player = this.playerManager.getPlayer(client.sessionId);
-      if (player) {
-        player.setPosition(message.position, message.velocity);
-      } else {
-        console.log("missing player for " + client.sessionId);
-      }
-    });
+    this.playerManager.setup();
 
     this.onMessage("shoot", this.handleShoot.bind(this));
 

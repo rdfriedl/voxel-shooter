@@ -1,4 +1,5 @@
-import Sheet from "@mui/joy/Sheet";
+import List from "@mui/joy/List";
+import ListItem from "@mui/joy/ListItem";
 import { getRoom, onPlayerJoin, onPlayerLeave } from "../../../connection";
 import { useForceUpdate } from "../../hooks/use-force-update";
 import { useSignal } from "../../hooks/use-signal";
@@ -12,10 +13,10 @@ export const Scoreboard = () => {
   const players = Array.from(room?.state?.players.entries() || []);
 
   return (
-    <Sheet color="neutral" variant="soft">
+    <List variant="outlined">
       {players.map(([id, player]) => (
-        <div key={id}>{player.id}</div>
+        <ListItem key={id}>{player.id}</ListItem>
       ))}
-    </Sheet>
+    </List>
   );
 };

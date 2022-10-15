@@ -1,3 +1,4 @@
+import { Client } from "colyseus";
 import { Ray, Vector3 } from "three";
 import { PlayerState } from "../../../common/schema";
 import { GameRoom } from "../../rooms/game-room";
@@ -8,6 +9,24 @@ export class PlayerManager {
   players: Map<string, Player> = new Map();
   constructor(room: GameRoom) {
     this.room = room;
+  }
+
+  setup() {
+    this.room.onMessage("position", (client, message) => {
+      const player = this.players.get(client.sessionId);
+      if (player) {
+        player.setPosition(message.position, message.velocity);
+      }
+    });
+
+    this.room.onMessage("respawn", (client) => {
+      const player = this.players.get(client.sessionId);
+      if (player) {
+        const position = new Vector3(Math.random() * 500, 100, Math.random() * 500);
+        player.respawn(position);
+        client.send("respawn", position.toArray());
+      }
+    });
   }
 
   getPlayer(id: string) {
@@ -29,7 +48,8 @@ export class PlayerManager {
 
     const v = new Vector3();
     for (const [id, player] of this.players) {
-      if (player === ignore) return;
+      // skip the player if they are ignored or dead
+      if (player === ignore || !player.state.alive) return;
       const intersection = this.ray.intersectBox(player.hitbox, v);
       if (intersection) return { point: intersection, player };
     }

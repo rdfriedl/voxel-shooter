@@ -1,5 +1,6 @@
 import { System } from "ecsy";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
+import { RenderSystem } from "./render";
 import { SceneSystem } from "./scene";
 
 export class ControlsSystem extends System {
@@ -7,10 +8,11 @@ export class ControlsSystem extends System {
   constructor(world, attrs) {
     super(world, attrs);
 
-    const camera = world.getSystem(SceneSystem).camera;
+    const renderer = this.world.getSystem(RenderSystem).renderer;
+    const camera = this.world.getSystem(SceneSystem).camera;
     this.controls = new PointerLockControls(camera, document.body);
 
-    document.body.addEventListener("click", () => {
+    renderer.domElement.addEventListener("click", () => {
       this.controls.lock();
     });
   }

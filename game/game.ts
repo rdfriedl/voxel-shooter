@@ -39,6 +39,7 @@ export class Game {
     // systems
     this.world
       .registerSystem(SceneSystem)
+      .registerSystem(RenderSystem, { priority: 999 })
       .registerSystem(ControlsSystem)
       .registerSystem(PlayerController)
       .registerSystem(RemotePlayerSystem)
@@ -46,12 +47,12 @@ export class Game {
       .registerSystem(MovementSystem)
       .registerSystem(PositionSyncSystem)
       .registerSystem(VoxelWorldSystem)
-      .registerSystem(RenderSystem, { priority: 999 })
       .registerSystem(StatsSystem, { priority: 1000 });
 
-    const player = this.world
+    // create local player
+    this.world
       .createEntity("Player")
-      .addComponent(Movement, { position: new Vector3(200, 20, 200) })
+      .addComponent(Movement)
       .addComponent(Object3DComponent, { object: this.world.getSystem(ControlsSystem).controls.getObject() })
       .addComponent(LocalPlayerTag);
 

@@ -33,6 +33,16 @@ export class Player {
     this.hitbox.min.copy(this.position).sub(minOffset);
     this.hitbox.max.copy(this.position).add(maxOffset);
   }
+  respawn(position: Vector3) {
+    this.state.health = 100;
+    this.state.alive = true;
+    this.setPosition(position, new Vector3(0, 0, 0));
+  }
+
+  damage(amount: number) {
+    this.state.health -= amount;
+    this.state.alive = this.state.health > 0;
+  }
 
   update(dt: number) {
     const v = this.state.position.getVelocityVector();

@@ -25,7 +25,7 @@ export class Bullet {
     // TODO: find which hit first
     const playerHit = this.manager.room.playerManager.intersectRay(this.position, next, this.owner);
     if (playerHit) {
-      playerHit.player.state.health -= 10;
+      playerHit.player.damage(10);
       this.alive = false;
       return;
     }

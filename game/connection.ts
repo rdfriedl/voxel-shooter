@@ -11,10 +11,12 @@ export const onFirstState = new Signal<[State]>();
 export const onJoin = new Signal<[Room<State>]>();
 export const onLeave = new Signal<[number]>();
 export const onTimeChange = new Signal<[number]>();
+export const onRespawn = new Signal<[Vector3]>();
 
 export const onPlayerJoin = new Signal<[PlayerState]>();
 export const onPlayerLeave = new Signal<[PlayerState]>();
 export const onPlayerHealthChange = new Signal<[string, number]>();
+export const onPlayerAliveChange = new Signal<[PlayerState, boolean]>();
 export const onPlayerPositionChange = new Signal<[PlayerState]>();
 
 export const onBulletCreate = new Signal<[number, Vector3, Vector3]>();
@@ -46,13 +48,21 @@ export async function connect(userLnInfo: UserLnInfo) {
     room.onMessage("bullet-destroy", (id) => {
       onBulletDestroy.emit(parseInt(id));
     });
+    room.onMessage("respawn", (message: number[]) => {
+      const position = new Vector3().fromArray(message);
+      onRespawn.emit(position);
+    });
 
     room.state.players.onAdd = (player) => {
       player.onChange = (changes) => {
         for (const change of changes) {
           switch (change.field) {
             case "health":
-              return onPlayerHealthChange.emit(player.id, change.value);
+              onPlayerHealthChange.emit(player.id, change.value);
+              break;
+            case "alive":
+              onPlayerAliveChange.emit(player, change.value);
+              break;
           }
         }
       };
@@ -81,6 +91,13 @@ export async function connect(userLnInfo: UserLnInfo) {
   } catch (e) {
     console.error("Couldn't connect:", e);
   }
+}
+
+export function getPlayerState(id?: string) {
+  if (!room) return;
+  if (!id) id = room?.sessionId;
+
+  return room.state.players.get(id);
 }
 
 export function getRoom() {
