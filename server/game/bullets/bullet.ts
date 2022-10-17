@@ -11,6 +11,7 @@ export class Bullet {
   alive = true;
   position: Vector3 = new Vector3();
   velocity: Vector3 = new Vector3();
+  expire = 1;
   owner?: Player;
   manager: BulletManager;
   constructor(start: Vector3, velocity: Vector3, manager: BulletManager) {
@@ -37,7 +38,9 @@ export class Bullet {
     }
 
     this.position.copy(next);
-    if (this.manager.world.isVoxelOutOfBounds(this.position)) {
+
+    this.expire -= dt;
+    if (this.expire <= 0) {
       this.alive = false;
       return;
     }

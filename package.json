@@ -9,7 +9,7 @@
     "build:server": "tsc -p tsconfig.server.json",
     "dev": "concurrently yarn:dev:game yarn:dev:server",
     "dev:game": "vite",
-    "dev:server": "ts-node-dev --project tsconfig.server.json server/index.ts",
+    "dev:server": "ts-node-dev --files --transpile-only --respawn --inspect=4321 --project tsconfig.server.json server/index.ts",
     "format": "prettier -w ."
   },
   "dependencies": {

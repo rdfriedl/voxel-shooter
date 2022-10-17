@@ -49,7 +49,7 @@ export class PlayerManager {
     const v = new Vector3();
     for (const [id, player] of this.players) {
       // skip the player if they are ignored or dead
-      if (player === ignore || !player.state.alive) return;
+      if (player === ignore || !player.state.alive) continue;
       const intersection = this.ray.intersectBox(player.hitbox, v);
       if (intersection) return { point: intersection, player };
     }
