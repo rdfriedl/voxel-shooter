@@ -113,12 +113,12 @@ export class PlayerController extends System {
       }
     }
 
-    position.addScaledVector(velocity, delta);
-
-    if (position.y < -200) {
+    // stop the player from falling too far
+    if (position.y < -400) {
       velocity.y = 0;
-      position.y = 200;
     }
+
+    position.addScaledVector(velocity, delta);
   }
 }
 

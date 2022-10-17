@@ -59,6 +59,10 @@ export class PlayerManager {
   update(dt: number) {
     for (const [id, player] of this.players) {
       player.update(dt);
+
+      if (player.position.y < -200 && player.state.alive) {
+        player.damage(100);
+      }
     }
   }
 }
