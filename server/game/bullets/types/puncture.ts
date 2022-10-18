@@ -7,6 +7,13 @@ export class PunctureBullet extends Bullet {
   update(dt: number) {
     const next = Bullet.vec1.copy(this.position).addScaledVector(this.velocity, dt);
 
+    const playerHit = this.manager.room.playerManager.intersectRay(this.position, next, this.owner);
+    if (playerHit) {
+      playerHit.player.damage(10);
+      this.alive = false;
+      return;
+    }
+
     while (this.power > 0) {
       const intersection = intersectRay(this.position, next, this.manager.world);
       if (intersection) {
@@ -19,11 +26,8 @@ export class PunctureBullet extends Bullet {
       return;
     }
 
-    if (this.manager.world.isVoxelOutOfBounds(this.position)) {
-      this.alive = false;
-      return;
-    }
-
     this.position.copy(next);
+
+    this.updateExpire(dt);
   }
 }

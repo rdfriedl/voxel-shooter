@@ -39,6 +39,10 @@ export class Bullet {
 
     this.position.copy(next);
 
+    this.updateExpire(dt);
+  }
+
+  updateExpire(dt: number){
     this.expire -= dt;
     if (this.expire <= 0) {
       this.alive = false;
